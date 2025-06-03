@@ -1,0 +1,21 @@
+# Ignore VSCode settings folder
+.vscode/
+
+#ignore these directories whole
+/plots/
+/tex/
+/scripts/
+
+#Keep test_set
+/data/*
+!/data/test_set/
+!/data/test_set/**
+
+#Keep mwis_smart
+/programs/*
+!/programs/mwis_smart/
+!/programs/mwis_smart/**
+
+#Keep build directory as empty folder
+/build/**
+!build/.gitkeep
