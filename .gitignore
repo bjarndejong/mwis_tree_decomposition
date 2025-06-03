@@ -19,3 +19,7 @@
 #Keep build directory as empty folder
 /build/**
 !build/.gitkeep
+
+#Unused source files
+/src/storage.cpp
+/src/storage.h
