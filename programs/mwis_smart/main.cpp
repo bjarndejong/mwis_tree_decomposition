@@ -32,6 +32,7 @@ int main(int argc, char* argv[])
     string filename_graph;
 
     //CLI dealings
+    //
     vector<string> cliArguments;
     for(int i = 1; i<argc; i++)
         cliArguments.push_back(argv[i]);
@@ -55,38 +56,34 @@ int main(int argc, char* argv[])
     if(optionStatus==1)
         return optionStatus;
 
-    //Read treeDecomposition
-    TreeDecomp TD(filename_td);
-    //Read Graph
+    //Read and store .graph and .td
+    TreeDecomp TD(filename_td);     //Deprecated
     Graph G{filename_graph};
 
 
     int start = 1;
-
-    //Solve weighted maximum independent set problem dynamically
-    //dfs(start,TD,G);
-
     RootedTree RT(TD.N,start);
+
     Smartstorage<__uint128_t> S(G,TD.bags,store_c,track_solution);
 
     // Create a stringstream to capture std::cout output
-    std::stringstream buffer;
-    // Save the original std::cout buffer so we can restore it later
-    std::streambuf* originalCoutBuffer = std::cout.rdbuf();
-    // Redirect std::cout to our stringstream
-    std::cout.rdbuf(buffer.rdbuf());
+    // Store the original cout buffer to restore later
+    // Redirect cout to stringstream
+    stringstream buffer;
+    streambuf* originalCoutBuffer = cout.rdbuf();
+    cout.rdbuf(buffer.rdbuf());
 
     auto timestamp1 = chrono::high_resolution_clock::now();
     RT.df_traversal(
-                    bind(&Smartstorage<__uint128_t>::setup, &S, placeholders::_1),
-                    bind(&Smartstorage<__uint128_t>::discover, &S, placeholders::_1, placeholders::_2),      //[](const int&,const RootedTree&){},  //Call it with a dummy lambda option
-                    bind(&Smartstorage<__uint128_t>::finish, &S, placeholders::_1, placeholders::_2),  //[](const int&,const RootedTree&){}
-                    bind(&Smartstorage<__uint128_t>::cleanup, &S, placeholders::_1)         //[](const RootedTree&){}
-                    );
+        bind(&Smartstorage<__uint128_t>::setup, &S, placeholders::_1),
+        bind(&Smartstorage<__uint128_t>::discover, &S, placeholders::_1, placeholders::_2),
+        bind(&Smartstorage<__uint128_t>::finish, &S, placeholders::_1, placeholders::_2),  //[](const int&,const RootedTree&){} -- lambda dummy
+        bind(&Smartstorage<__uint128_t>::cleanup, &S, placeholders::_1)
+    );
     auto timestamp2 = chrono::high_resolution_clock::now();
-
-    // Step 4: Restore the original std::cout buffer
-    std::cout.rdbuf(originalCoutBuffer);
+    //Restore cout
+    cout.rdbuf(originalCoutBuffer);
+    
     int capturedValue = 0;
     int capturedPosition = 0;
     buffer >> capturedValue;
@@ -100,20 +97,14 @@ int main(int argc, char* argv[])
 
     if(track_solution)
     {
-    Solution<__uint128_t> MWIS(S,capturedPosition);
-    RT.df_traversal(
-                    bind(&Solution<__uint128_t>::setup, &MWIS, placeholders::_1),
-                    bind(&Solution<__uint128_t>::discover, &MWIS, placeholders::_1, placeholders::_2),//[](const int&, const RootedTree&){},
-                    [](const int&, const RootedTree&){},
-                    bind(&Solution<__uint128_t>::cleanup, &MWIS, placeholders::_1)                     //[](const RootedTree&){}
-                    );
-    print_vector(MWIS.MWIS);
-    //cout << G.weight_set(MWIS.MWIS) << endl;
-    //cout << G.independent_set(MWIS.MWIS) << endl;
-    }
-    else
-    {
-        
+        Solution<__uint128_t> MWIS(S,capturedPosition);
+        RT.df_traversal(
+            bind(&Solution<__uint128_t>::setup, &MWIS, placeholders::_1),
+            bind(&Solution<__uint128_t>::discover, &MWIS, placeholders::_1, placeholders::_2),//[](const int&, const RootedTree&){} -- lambda dummy
+            [](const int&, const RootedTree&){},
+            bind(&Solution<__uint128_t>::cleanup, &MWIS, placeholders::_1)
+        );
+        print_vector(MWIS.MWIS);
     }
     return 0;
 }
