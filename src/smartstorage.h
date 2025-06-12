@@ -21,7 +21,7 @@ public:
     std::vector<std::vector<std::vector<int>>> p;
 
     const Graph& G;
-    const std::vector<std::vector<int>> bags;
+    const std::vector<std::vector<int>>& bags;
 
     Smartstorage(const Graph& G, const std::vector<std::vector<int>>& BAGS, const bool& store_c, const bool& track_solution);
 
