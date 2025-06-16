@@ -21,10 +21,10 @@ mwis_smart [options] <.td file> <.graph file>
     - `n` = number of vertices  
     - `m` = number of edges  
     - The constant `10` (format identifier)  
+  - Vertices are numbered consecutively from 1 to `n`
   - Each of the following `n` lines describes a vertex:  
     - The line contains the vertex weight `w(v)` followed by the vertex’s neighbors `N(v)`  
     - Example: `7 9 10` means vertex weight 7, neighbors vertices 9 and 10  
-  - Vertices are numbered consecutively from 1 to `n`
 
 - **`.td` file (Input Tree Decomposition):**  
   Must follow the PACE 2017 format and be sorted as follows:  
