@@ -8,7 +8,7 @@
 class RootedTree
 {
 public:
-    const std::vector<std::vector<int>> N;
+    const std::vector<std::vector<int>>& N;
     const int number_of_nodes;
     const int root;
 

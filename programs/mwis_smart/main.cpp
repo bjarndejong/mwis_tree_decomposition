@@ -57,7 +57,7 @@ int main(int argc, char* argv[])
         return optionStatus;
 
     //Read and store .graph and .td
-    TreeDecomp TD(filename_td);     //Deprecated
+    TreeDecomp TD(filename_td);
     Graph G{filename_graph};
 
 

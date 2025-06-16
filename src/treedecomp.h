@@ -5,15 +5,11 @@
 #include <vector>
 #include <string>
 
-//FORWARD DECLARE CLASSES
-class Graph;
-class DP;
-
 class TreeDecomp
 {
 public:
-    std::vector<std::vector<int>> N;//N[node - 1]:  is the Neighborhood of node
-    std::vector<std::vector<int>> bags;
+    std::vector<std::vector<int>> N;        // N[node - 1] is the neighborhood of node
+    std::vector<std::vector<int>> bags;     // bags[node - 1] are the bagcontents of node sorted in ascending order
     TreeDecomp(std::string ifname);
     void print_TreeDecomp() const;
 };

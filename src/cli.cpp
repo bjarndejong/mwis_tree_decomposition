@@ -163,7 +163,7 @@ int check_for_help(const vector<string>& cliArguments)
             << "        u v   (with u < v)\n"
             << "    - The list of edges must be sorted in ascending lexicographical order:\n"
             << "        For edges u v and i j,\n"
-            << "        u v < i j if u < i, or u == i and v < j\n"
+            << "        u v < i j if u < i, or u = i and v < j\n"
             << "  Unsorted .td files may result in incorrect behavior.\n"
             << "  Consider preprocessing your tree decomposition to ensure sorted order.\n\n"
 
