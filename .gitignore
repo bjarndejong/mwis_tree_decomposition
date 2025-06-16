@@ -8,11 +8,13 @@
 
 #Keep test_set
 /data/*
+!/data/.gitkeep
 !/data/test_set/
 !/data/test_set/**
 
 #Keep mwis_smart
 /programs/*
+!/programs/.gitkeep
 !/programs/mwis_smart/
 !/programs/mwis_smart/**
 
