@@ -17,6 +17,8 @@
 !/programs/.gitkeep
 !/programs/mwis_smart/
 !/programs/mwis_smart/**
+!/programs/graph_to_gr_format_converter/
+!/programs/graph_to_gr_format_converter/**
 
 #Keep build directory as empty folder
 /build/**
