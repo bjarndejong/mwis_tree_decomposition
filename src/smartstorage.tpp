@@ -35,7 +35,7 @@ void Smartstorage<T>::setup(const RootedTree& RT)
 }
 
 template<typename T>
-void Smartstorage<T>::discover(const int& current, const RootedTree& RT)    //Prepare current node
+void Smartstorage<T>::discover(const int current, const RootedTree& RT)    //Prepare current node
 {
     if(track_solution)
     {
@@ -44,7 +44,7 @@ void Smartstorage<T>::discover(const int& current, const RootedTree& RT)    //Pr
 }
 
 template<typename T>
-void Smartstorage<T>::finish(const int& current, const RootedTree& RT)
+void Smartstorage<T>::finish(const int current, const RootedTree& RT)
 {
     if((RT.N[current-1].size() == 1 && current != RT.root) || (current == RT.root && RT.N[current-1].size() == 0))
     {
@@ -71,7 +71,7 @@ void Smartstorage<T>::cleanup(const RootedTree& RT)
 }
 
 template<typename T>
-void Smartstorage<T>::update_current(const int& current, const RootedTree& RT)
+void Smartstorage<T>::update_current(const int current, const RootedTree& RT)
 {
     if((RT.N[current-1].size()>2 && current != RT.root) || (current == RT.root && RT.N[current-1].size()>1))
     {
@@ -89,13 +89,13 @@ void Smartstorage<T>::update_current(const int& current, const RootedTree& RT)
 }
 
 template<typename T>
-void Smartstorage<T>::update_to_parent(const int& current, const RootedTree& RT)
+void Smartstorage<T>::update_to_parent(const int current, const RootedTree& RT)
 {
     walk_virtual_path(current,RT);
 }
 
 template<typename T>
-void Smartstorage<T>::walk_virtual_path(const int& current, const RootedTree& RT)                            //Chosen method of updating current information to parent information
+void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)                            //Chosen method of updating current information to parent information
 {
     int parent = RT.parents[current-1];
     int neighbourposition = RT.neighbourIterators[parent-1] - RT.N[parent-1].begin();
@@ -242,8 +242,8 @@ void Smartstorage<T>::walk_virtual_path(const int& current, const RootedTree& RT
 
 template<typename T>
 void Smartstorage<T>::take_virtual_step_introduce(
-    const int& current_virtual, vector<vector<int>>& c_virtual, vector<vector<int>>& p_virtual, 
-    const int& i, 
+    const int current_virtual, vector<vector<int>>& c_virtual, vector<vector<int>>& p_virtual, 
+    const int i, 
     const vector<int>& bag_virtual, vector<vector<T>>& valid_virtual)
 {
     int parent_virtual = (current_virtual%2) + 1;
@@ -343,8 +343,8 @@ void Smartstorage<T>::take_virtual_step_introduce(
 }
 
 template<typename T>
-void Smartstorage<T>::take_virtual_step_forget(const int& current_virtual, vector<vector<int>>& c_virtual,vector<vector<int>>& p_virtual, 
-    const int& i, 
+void Smartstorage<T>::take_virtual_step_forget(const int current_virtual, vector<vector<int>>& c_virtual,vector<vector<int>>& p_virtual, 
+    const int i, 
     const vector<int>& bag_virtual, vector<vector<T>>& valid_virtual)
 {
     int parent_virtual = (current_virtual%2) + 1;
@@ -400,7 +400,7 @@ void Smartstorage<T>::take_virtual_step_forget(const int& current_virtual, vecto
 
 
 template<typename T>
-void Smartstorage<T>::initialize_leaf(const int& current, const RootedTree& RT)
+void Smartstorage<T>::initialize_leaf(const int current, const RootedTree& RT)
 {
     int parent = current;
     int neighbourposition = RT.neighbourIterators[parent-1] - RT.N[parent-1].begin();
@@ -520,7 +520,7 @@ void Smartstorage<T>::turn_off_node_storage(const int& current, const RootedTree
 */
 
 template<typename T>
-void Smartstorage<T>::show_state(const int& current, const RootedTree& RT)
+void Smartstorage<T>::show_state(const int current, const RootedTree& RT)
 {
     cout << current << ": " << endl;
     for(int i = 0; i<bags.size();i++)
@@ -530,7 +530,7 @@ void Smartstorage<T>::show_state(const int& current, const RootedTree& RT)
 }
 
 template<typename T>
-void Smartstorage<T>::end_virtual_path(const int& current, const RootedTree& RT,
+void Smartstorage<T>::end_virtual_path(const int current, const RootedTree& RT,
         std::vector<int>& c_virtual, std::vector<int>& p_virtual, std::vector<T>& valid_virtual)
 {
     int parent = RT.parents[current-1];
@@ -595,7 +595,7 @@ void Smartstorage<T>::end_virtual_path(const int& current, const RootedTree& RT,
 }
 
 template<typename T>
-void Smartstorage<T>::begin_virtual_path(const int& current, const RootedTree& RT,
+void Smartstorage<T>::begin_virtual_path(const int current, const RootedTree& RT,
         std::vector<int>& c_virtual, std::vector<int>& p_virtual, std::vector<T>& valid_virtual)
 {
     valid_virtual = move(validcandidates[current-1]);   //
@@ -610,7 +610,7 @@ void Smartstorage<T>::begin_virtual_path(const int& current, const RootedTree& R
 }
 
 template<typename T>
-void Smartstorage<T>::end_virtual_path_no_files(const int& current, const RootedTree& RT,
+void Smartstorage<T>::end_virtual_path_no_files(const int current, const RootedTree& RT,
     std::vector<int>& c_virtual, std::vector<int>& p_virtual, std::vector<T>& valid_virtual)
 {
     int parent = RT.parents[current-1];

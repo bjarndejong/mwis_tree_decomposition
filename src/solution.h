@@ -20,12 +20,12 @@ public:
     std::vector<int> MWIS;
     std::vector<int> SIZES;
 
-    Solution(const Smartstorage<T>& S, const int& positionMWIS);
+    Solution(const Smartstorage<T>& S, const int positionMWIS);
 
     //DF traversal functions
     void setup(const RootedTree& RT);
-    void discover(const int& current, const RootedTree& RT);
-    void finish(const int& current, const RootedTree& RT);
+    void discover(const int current, const RootedTree& RT);
+    void finish(const int current, const RootedTree& RT);
     void cleanup(const RootedTree& RT);
 };
 

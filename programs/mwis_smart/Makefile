@@ -32,7 +32,3 @@ $(TARGET): main.cpp $(SRC_FILES)
 # Clean the build
 clean:
 	rm -f $(TARGET)
-
-# Just build the program, no arguments here
-run: $(TARGET)
-	$(TARGET)

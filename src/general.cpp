@@ -13,7 +13,7 @@ using namespace std;
 
 namespace fs = std::filesystem;
 
-void remove_c_file(const int& current)
+void remove_c_file(const int current)
 {
     string filename = "c_" + to_string(current) + "_.zstd";
     fs::remove(filename);  // Succeeds if file exists, does nothing if not
@@ -30,14 +30,14 @@ vector<int> bitmask_filter(const unsigned int bitmask, const vector<int>& v)
 }
     */
 
-void print_vector(const std::vector<int>& v)
+void print_vector(const vector<int>& v)
 {
     for(vector<int>::const_iterator it = v.begin(); it != v.end(); it++)
         cout << *it << ' ';
     cout << endl;
 }
 
-void print_vector(const std::vector<unsigned int>& v)
+void print_vector(const vector<unsigned int>& v)
 {
     for(vector<unsigned int>::const_iterator it = v.begin(); it != v.end(); it++)
         cout << *it << ' ';
@@ -56,7 +56,7 @@ int countr_zero(__uint128_t x) {
     }
 }
 
-void compress_c_to_file(const int& current, const vector<int>& v)
+void compress_c_to_file(const int current, const vector<int>& v)
 {
     string filename("c_"+to_string(current)+"_.zstd");
 
@@ -80,7 +80,7 @@ void compress_c_to_file(const int& current, const vector<int>& v)
 }
 
 // Decompress the Zstd file and return the vector of integers
-void decompress_c_from_file_and_add(const int& current, vector<int>& v)
+void decompress_c_from_file_and_add(const int current, vector<int>& v)
 {
     string filename = "c_" + to_string(current) + "_.zstd";
 
@@ -124,7 +124,7 @@ void decompress_c_from_file_and_add(const int& current, vector<int>& v)
     }
 }
 
-void compress_p_to_file(const int& current, const int& neighbourposition, const vector<int>& v)
+void compress_p_to_file(const int current, const int neighbourposition, const vector<int>& v)
 {
     string filename("p_"+to_string(current)+"_"+to_string(neighbourposition)+"_.zstd");
 
@@ -147,7 +147,7 @@ void compress_p_to_file(const int& current, const int& neighbourposition, const 
     out_file.write(compressed_data.data(), compressed_size);
 }
 
-void decompress_p_from_file(const int& current, const int& neighbourposition,vector<int>& v)
+void decompress_p_from_file(const int current, const int neighbourposition, vector<int>& v)
 {
     string filename = "p_"+to_string(current)+"_"+to_string(neighbourposition)+"_.zstd";
 
@@ -186,10 +186,10 @@ void decompress_p_from_file(const int& current, const int& neighbourposition,vec
 
     // Overwrite v directly with decompressed values
     const int* decompressed_ints = reinterpret_cast<const int*>(decompressed_data.data());
-    std::memcpy(v.data(), decompressed_ints, decompressed_size);
+    memcpy(v.data(), decompressed_ints, decompressed_size);
 }
 
-void remove_p_file(const int& current, const int& neighbourposition)
+void remove_p_file(const int current, const int neighbourposition)
 {
     string filename = "p_" +to_string(current)+"_"+to_string(neighbourposition)+ "_.zstd";
     fs::remove(filename);  // Succeeds if file exists, does nothing if not

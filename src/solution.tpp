@@ -22,7 +22,7 @@ vector<int> bitmask_filter(const T& bitmask, const vector<int>& v)
 }
 
 template<typename T>
-Solution<T>::Solution(const Smartstorage<T>& SMART, const int& positionMWIS):S(SMART), positionMWIS(positionMWIS)
+Solution<T>::Solution(const Smartstorage<T>& SMART, const int positionMWIS):S(SMART), positionMWIS(positionMWIS)
 {
 }
 
@@ -35,7 +35,7 @@ void Solution<T>::setup(const RootedTree& RT)
 }
 
 template<typename T>
-void Solution<T>::discover(const int& current, const RootedTree& RT)
+void Solution<T>::discover(const int current, const RootedTree& RT)
 {
     int parent = RT.parents[current-1];
     int neighbourposition = RT.neighbourIterators[parent-1] - RT.N[parent-1].begin();
@@ -100,7 +100,7 @@ void Solution<T>::discover(const int& current, const RootedTree& RT)
 }
 
 template<typename T>                                            //EMPTY
-void Solution<T>::finish(const int& current, const RootedTree& RT)
+void Solution<T>::finish(const int current, const RootedTree& RT)
 {
     
 }

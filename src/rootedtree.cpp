@@ -47,7 +47,7 @@ RootedTree::RootedTree(const vector<vector<int>>& ADJ, int root) : N(ADJ), root(
         neighbourIterators[i] = N[i].begin();
 }
 
-void RootedTree::df_traversal(function<void(const RootedTree&)> setup,function<void(const int&, const RootedTree&)> discover,function<void(const int&, const RootedTree&)> finish,function<void(const RootedTree&)> cleanup)
+void RootedTree::df_traversal(function<void(const RootedTree&)> setup,function<void(const int, const RootedTree&)> discover,function<void(const int, const RootedTree&)> finish,function<void(const RootedTree&)> cleanup)
 {
     setup(*this);
 

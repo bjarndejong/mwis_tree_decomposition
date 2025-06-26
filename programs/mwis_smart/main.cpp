@@ -57,11 +57,11 @@ int main(int argc, char* argv[])
         return optionStatus;
 
     //Read and store .graph and .td
-    TreeDecomp TD(filename_td);
-    Graph G{filename_graph};
+    TreeDecomp TD = TreeDecomp::from_file(filename_td);
+    Graph G = Graph::from_file(filename_graph);
 
 
-    int start = 1;
+    const int start = 1;
     RootedTree RT(TD.N,start);
 
     Smartstorage<__uint128_t> S(G,TD.bags,store_c,track_solution);

@@ -1,3 +1,5 @@
+# Exact MWIS Solver using Tree Decompositions
+
 ## Command-Line Usage
 
 ```bash

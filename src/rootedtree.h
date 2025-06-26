@@ -21,8 +21,8 @@ public:
 
     void df_traversal(
         std::function<void(const RootedTree&)> setup,
-        std::function<void(const int&, const RootedTree&)> discover,
-        std::function<void(const int&, const RootedTree&)> finish,
+        std::function<void(const int, const RootedTree&)> discover,
+        std::function<void(const int, const RootedTree&)> finish,
         std::function<void(const RootedTree&)> cleanup
                       );
 };

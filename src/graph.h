@@ -8,20 +8,18 @@
 class Graph
 {
 public:
-    std::vector<std::vector<int>> N;          //N[vertex-1]: is the Neighborhood of vertex
-    std::vector<int> weights;
+    const std::vector<std::vector<int>> N;                  //N[vertex-1]: is the Neighborhood of vertex
+    const std::vector<int> weights;
 
-    Graph(std::string ifname);
+    static Graph from_file(const std::string& ifname);      // Static factory method
+ 
     void print() const;
 
     bool adjacent(int u, int v) const;
-
-    void dfs(const int start) const;        //Doesn't exist
-    void bfs(const int start) const;        //Doesn't exist
-
     bool independent_set(const std::vector<int>& subset) const;
-
     int weight_set(const std::vector<int>& subset) const;
+private:
+    Graph(std::vector<std::vector<int>>&& N, std::vector<int>&& weights);
 };
 
 #endif // GRAPH_H_INCLUDED
