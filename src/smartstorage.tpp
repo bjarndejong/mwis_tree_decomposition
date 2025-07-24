@@ -257,10 +257,15 @@ void Smartstorage<T>::take_virtual_step_introduce(
     //Setup adjacencymatrix for bag_virtual
     vector<int> adjacency_row_virtual(bag_virtual.size(),0);
 
+    int k = 0;
     for(int j = 0; j < bag_virtual.size(); j++)
     {
-        if(G.adjacent(bag_virtual[i],bag_virtual[j]))       //prob quicker to walk through the neighborhood of bag_virtual[i], but uglier
-            adjacency_row_virtual[j] = 1;     
+        //if(G.adjacent(bag_virtual[i],bag_virtual[j]))       //prob quicker to walk through the neighborhood of bag_virtual[i], but uglier
+        //    adjacency_row_virtual[j] = 1;
+        while(k<G.N[bag_virtual[i]-1].size() && G.N[bag_virtual[i]-1][k] < bag_virtual[j])
+            k++;
+        if(k<G.N[bag_virtual[i]-1].size() && G.N[bag_virtual[i]-1][k] == bag_virtual[j])
+            adjacency_row_virtual[j] = 1;
     }
     size_t remember_start = 0;
     size_t remember_end = 0;
@@ -496,37 +501,6 @@ void Smartstorage<T>::initialize_leaf(const int current, const RootedTree& RT)
             p[parent-1][neighbourposition] = move(p_virtual[current_virtual-1]);
     }
     */
-}
-
-/*
-template<typename T>
-void Smartstorage<T>::turn_off_node_storage(const int& current, const RootedTree& RT)
-{
-    //Turn off validcandidates                                            //SHOULD ALREADY BE DONE AS WE MOVED IT(THOUGH NOT SAFE TO MOVE FOR SOLUTION CLASS)
-    validcandidates[current-1] = vector<T>();
-
-    //Turn off c                                                          //SHOULD ALREADY BE DONE AS WE MOVED IT(SAVE TO MOVE,ALWAYS)
-    c[current-1] = vector<int>();
-
-    remove_c_file(current);
-
-    if(track_solution)
-    {
-        //Turn off p
-        for(int neighbourposition = 0; neighbourposition < RT.N[current-1].size(); neighbourposition++) //P
-            p[current-1][neighbourposition] = vector<int>();                                            //P
-    }
-}
-*/
-
-template<typename T>
-void Smartstorage<T>::show_state(const int current, const RootedTree& RT)
-{
-    cout << current << ": " << endl;
-    for(int i = 0; i<bags.size();i++)
-    {
-        cout << validcandidates[i].size() << endl;
-    }
 }
 
 template<typename T>

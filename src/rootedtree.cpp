@@ -47,6 +47,26 @@ RootedTree::RootedTree(const vector<vector<int>>& ADJ, int root) : N(ADJ), root(
         neighbourIterators[i] = N[i].begin();
 }
 
+void RootedTree::reroot(const int newroot)
+{
+    int current = newroot;
+    int parent = parents[current - 1];
+    int grandparent;
+
+    while(current != root)
+    {
+        grandparent = parents[parent-1];
+        parents[parent-1] = current;
+        current = parent;
+        parent = grandparent;
+    }
+    parents[newroot-1] = newroot;
+
+    root = newroot;
+}
+
+
+/*
 void RootedTree::df_traversal(function<void(const RootedTree&)> setup,function<void(const int, const RootedTree&)> discover,function<void(const int, const RootedTree&)> finish,function<void(const RootedTree&)> cleanup)
 {
     setup(*this);
@@ -91,3 +111,4 @@ void RootedTree::df_traversal(function<void(const RootedTree&)> setup,function<v
     for(int i = 0; i<number_of_nodes; i++)          //RESET state of RootedTree,
         neighbourIterators[i] = N[i].begin();
 }
+*/

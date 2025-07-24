@@ -31,9 +31,6 @@ public:
     void finish(const int current, const RootedTree& RT);
     void cleanup(const RootedTree& RT);
 
- 
-    void turn_off_node_storage(const int current, const RootedTree& RT);
-
 
     void initialize_leaf(const int current, const RootedTree& RT);                   //done
  
@@ -52,9 +49,6 @@ public:
         std::vector<int>& c_virtual, std::vector<int>& p_virtual, std::vector<T>& valid_virtual);
     void end_virtual_path_no_files(const int current, const RootedTree& RT,
         std::vector<int>& c_virtual, std::vector<int>& p_virtual, std::vector<T>& valid_virtual);
-
-    //Test/output functions
-    void show_state(const int current, const RootedTree& RT);
 };
 
 #include "smartstorage.tpp"
