@@ -256,6 +256,7 @@ void Smartstorage<T>::take_virtual_step_introduce(
     }
     //Setup adjacencymatrix for bag_virtual
     vector<int> adjacency_row_virtual(bag_virtual.size(),0);
+    T adjacency_mask = 0;
 
     int k = 0;
     for(int j = 0; j < bag_virtual.size(); j++)
@@ -265,7 +266,10 @@ void Smartstorage<T>::take_virtual_step_introduce(
         while(k<G.N[bag_virtual[i]-1].size() && G.N[bag_virtual[i]-1][k] < bag_virtual[j])
             k++;
         if(k<G.N[bag_virtual[i]-1].size() && G.N[bag_virtual[i]-1][k] == bag_virtual[j])
+        {
             adjacency_row_virtual[j] = 1;
+            adjacency_mask += (T(1) << j);
+        }
     }
     size_t remember_start = 0;
     size_t remember_end = 0;
@@ -306,10 +310,12 @@ void Smartstorage<T>::take_virtual_step_introduce(
                 
                 //independentset test
                 if(higher_start + lower_start == 0 ||
-                    (adjacency_row_virtual[j] == 0 &&
-                    binary_search(valid_virtual[parent_virtual-1].begin(),    //CONSIDER DIFFERENT START AND END
-                    valid_virtual[parent_virtual-1].end(),
-                    higher_start + (T(1)<<i) +lower_start - (T(1)<<j)) == true))    
+                    //(adjacency_row_virtual[j] == 0 &&
+                    //binary_search(valid_virtual[parent_virtual-1].begin(),    //CONSIDER DIFFERENT START AND END
+                    //valid_virtual[parent_virtual-1].end(),
+                    //higher_start + (T(1)<<i) +lower_start - (T(1)<<j)) == true))  
+                    (adjacency_mask & (higher_start + lower_start)) == 0
+                )  
                 {
                     valid_virtual[parent_virtual-1].push_back(higher_start + (T(1)<<i) + lower_start);
                     c_virtual[parent_virtual-1].push_back(c_virtual[current_virtual-1][remember_start]+G.weights[bag_virtual[i]-1]);
@@ -333,9 +339,11 @@ void Smartstorage<T>::take_virtual_step_introduce(
 
         //independentset test                       //CONSIDER BETTER START AND END
         if(higher_start + lower_start == 0 ||
-            (adjacency_row_virtual[j] == 0 &&
-            binary_search(valid_virtual[parent_virtual-1].begin(),valid_virtual[parent_virtual-1].end(),
-                    higher_start + (T(1)<<i) +lower_start - (T(1)<<j)) == true))
+            //(adjacency_row_virtual[j] == 0 &&
+            //binary_search(valid_virtual[parent_virtual-1].begin(),valid_virtual[parent_virtual-1].end(),
+            //        higher_start + (T(1)<<i) +lower_start - (T(1)<<j)) == true))
+            (adjacency_mask & (higher_start + lower_start)) == 0
+        )
         {
             valid_virtual[parent_virtual-1].push_back(higher_start + (T(1)<<i) + lower_start);
             c_virtual[parent_virtual-1].push_back(c_virtual[current_virtual-1][remember_start]+G.weights[bag_virtual[i]-1]);
