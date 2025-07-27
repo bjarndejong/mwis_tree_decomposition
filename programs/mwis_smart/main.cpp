@@ -19,6 +19,8 @@
 #include "../../src/general.h"
 #include "../../src/smartstorage.h"
 #include "../../src/cli.h"
+#include "../../src/binaryinteger.h"
+
 
 
 using namespace std;
@@ -60,11 +62,16 @@ int main(int argc, char* argv[])
     TreeDecomp TD = TreeDecomp::from_file(filename_td);
     Graph G = Graph::from_file(filename_graph);
 
+    size_t max_bag_size = 0;
+    for(size_t i = 0; i<TD.bags.size(); i++)
+        max_bag_size = max(max_bag_size,TD.bags[i].size());
+    
+    BinaryInteger::set_number_of_blocks(max_bag_size);
 
     const int start = 1;
     RootedTree RT(TD.N,start);
 
-    Smartstorage<__uint128_t> S(G,TD.bags,store_c,track_solution);
+    Smartstorage<BinaryInteger> S(G,TD.bags,store_c,track_solution);
 
     // Create a stringstream to capture std::cout output
     // Store the original cout buffer to restore later
@@ -75,10 +82,10 @@ int main(int argc, char* argv[])
 
     auto timestamp1 = chrono::high_resolution_clock::now();
     RT.df_traversal(
-        bind(&Smartstorage<__uint128_t>::setup, &S, placeholders::_1),
-        bind(&Smartstorage<__uint128_t>::discover, &S, placeholders::_1, placeholders::_2),
-        bind(&Smartstorage<__uint128_t>::finish, &S, placeholders::_1, placeholders::_2),  //[](const int&,const RootedTree&){} -- lambda dummy
-        bind(&Smartstorage<__uint128_t>::cleanup, &S, placeholders::_1)
+        bind(&Smartstorage<BinaryInteger>::setup, &S, placeholders::_1),
+        bind(&Smartstorage<BinaryInteger>::discover, &S, placeholders::_1, placeholders::_2),
+        bind(&Smartstorage<BinaryInteger>::finish, &S, placeholders::_1, placeholders::_2),  //[](const int&,const RootedTree&){} -- lambda dummy
+        bind(&Smartstorage<BinaryInteger>::cleanup, &S, placeholders::_1)
     );
     auto timestamp2 = chrono::high_resolution_clock::now();
     //Restore cout
@@ -97,12 +104,12 @@ int main(int argc, char* argv[])
 
     if(track_solution)
     {
-        Solution<__uint128_t> MWIS(S,capturedPosition);
+        Solution<BinaryInteger> MWIS(S,capturedPosition);
         RT.df_traversal(
-            bind(&Solution<__uint128_t>::setup, &MWIS, placeholders::_1),
-            bind(&Solution<__uint128_t>::discover, &MWIS, placeholders::_1, placeholders::_2),//[](const int&, const RootedTree&){} -- lambda dummy
+            bind(&Solution<BinaryInteger>::setup, &MWIS, placeholders::_1),
+            bind(&Solution<BinaryInteger>::discover, &MWIS, placeholders::_1, placeholders::_2),//[](const int&, const RootedTree&){} -- lambda dummy
             [](const int&, const RootedTree&){},
-            bind(&Solution<__uint128_t>::cleanup, &MWIS, placeholders::_1)
+            bind(&Solution<BinaryInteger>::cleanup, &MWIS, placeholders::_1)
         );
         print_vector(MWIS.MWIS);
     }

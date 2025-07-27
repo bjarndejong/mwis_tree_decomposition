@@ -8,6 +8,7 @@
 #include "smartstorage.h"
 #include "general.h"
 #include "solution.h"
+#include "bitops.h"
 
 using namespace std;
 
@@ -16,7 +17,7 @@ vector<int> bitmask_filter(const T& bitmask, const vector<int>& v)
 {
     vector<int> filtered_vector;
     for(int i = 0; i<v.size(); i++)
-        if(bitmask & (T(1)<<i))
+        if(bitmask & (Bitops<T>::bit(i)))
             filtered_vector.push_back(v[i]);
     return filtered_vector;
 }
@@ -56,21 +57,23 @@ void Solution<T>::discover(const int current, const RootedTree& RT)
     for(int i = 0; i<S.bags[current-1].size(); i++)
     {
         int vSize = validcandidates.size();
-        validcandidates.push_back(T(1)<<i);
+        validcandidates.push_back(Bitops<T>::bit(i));
         for(int index = 1; index<vSize; index++)
         {
             //add validcandidates[index]+(T(1)<<i) if it is an independent set
-            int j = countr_zero(validcandidates[index]);
+            int j = Bitops<T>::countr_zero(validcandidates[index]);
 
             if(
                 binary_search(validcandidates.begin(),    //CONSIDER DIFFERENT START AND END
                     validcandidates.end(),
-                    validcandidates[index] + (T(1)<<i) - (T(1)<<j)) == true
+                    ((validcandidates[index] | (Bitops<T>::bit(i))) 
+                        & ~(Bitops<T>::bit(j))
+                    )) == true
                     &&
                     adjacency_matrix[i][j]==0
             )
             {
-                validcandidates.push_back(validcandidates[index]+(T(1)<<i));
+                validcandidates.push_back(validcandidates[index] | (Bitops<T>::bit(i)));
                 //cout << current << ": " << validcandidates.size() << endl;
             }
         }

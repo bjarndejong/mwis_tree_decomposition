@@ -12,6 +12,7 @@
 #include "graph.h"
 #include "rootedtree.h"
 #include "general.h"
+#include "bitops.h"
 
 using namespace std;
 
@@ -79,8 +80,8 @@ void Smartstorage<T>::update_current(const int current, const RootedTree& RT)
         w[0] = 0;
         for(size_t index = 1; index<validcandidates[current-1].size(); index++)
         {
-            int j = countr_zero(validcandidates[current-1][index]);
-            auto it = lower_bound(validcandidates[current-1].begin(),validcandidates[current-1].begin() + index - 1,validcandidates[current-1][index] - (T(1)<<j));
+            int j = Bitops<T>::countr_zero(validcandidates[current-1][index]);
+            auto it = lower_bound(validcandidates[current-1].begin(),validcandidates[current-1].begin() + index - 1, validcandidates[current-1][index] & ~(Bitops<T>::bit(j)));
             w[index] = w[it-validcandidates[current-1].begin()]+G.weights[bags[current-1][j]-1];
         }
         for(size_t index = 0; index < c[current-1].size(); index++)
@@ -270,21 +271,21 @@ void Smartstorage<T>::take_virtual_step_introduce(
     size_t remember_start = 0;
     size_t remember_end = 0;
 
-    T lowerbitmask = (T(1)<<i) - 1;
+    T lowerbitmask = Bitops<T>::mask_below(i);///////////////////////////////////////////////////////////////// MAKE BITWISE
 
     for(size_t current_index = 0; current_index < valid_virtual[current_virtual-1].size();)
     {
         T lower = valid_virtual[current_virtual-1][current_index] & lowerbitmask;
-        T higher = (valid_virtual[current_virtual-1][current_index] - lower) << 1;
+        T higher = (valid_virtual[current_virtual-1][current_index] & ~lower) << 1; // a & ~b = a - b for a and b bitwise disjoint, a>=b
 
         T lower_start = valid_virtual[current_virtual-1][remember_start] & lowerbitmask;
-        T higher_start = (valid_virtual[current_virtual-1][remember_start] - lower_start) << 1;
+        T higher_start = (valid_virtual[current_virtual-1][remember_start] & ~lower_start) << 1;
 
         //if(valid_virtual[current_virtual-1][current_index] - valid_virtual[current_virtual-1][remember_start] < (T(1)<<i))
         //if(higher + lower - higher_start + lower_start < (T(1)<<i))
         if(higher == higher_start)
         {
-            valid_virtual[parent_virtual-1].push_back(higher + lower);
+            valid_virtual[parent_virtual-1].push_back(higher | lower);
             c_virtual[parent_virtual-1].push_back(c_virtual[current_virtual-1][current_index]);
             if(track_solution)
             {
@@ -298,21 +299,21 @@ void Smartstorage<T>::take_virtual_step_introduce(
             for(;remember_start <= remember_end; remember_start++)
             {
                 T lower_start = valid_virtual[current_virtual-1][remember_start] & lowerbitmask;
-                T higher_start = (valid_virtual[current_virtual-1][remember_start] - lower_start) << 1;
+                T higher_start = (valid_virtual[current_virtual-1][remember_start] & ~lower_start) << 1;
 
                 //Find a lower significant bit than i  such that (higher_start+lower_start + (T(1)<<i) - (T(1)<<j))
                 
-                int j = countr_zero(higher_start + lower_start);
+                int j = Bitops<T>::countr_zero(higher_start | lower_start);
                 
                 //independentset test
-                if(higher_start + lower_start == 0 ||
+                if((higher_start | lower_start) == 0 ||
                     (adjacency_row_virtual[j] == 0 &&
                     binary_search(valid_virtual[parent_virtual-1].begin(),    //CONSIDER DIFFERENT START AND END
                     valid_virtual[parent_virtual-1].end(),
-                    higher_start + (T(1)<<i) +lower_start - (T(1)<<j)) == true))    
+                    ((higher_start | (Bitops<T>::bit(i)) | lower_start) & ~(Bitops<T>::bit(j)))) == true))    
                 {
-                    valid_virtual[parent_virtual-1].push_back(higher_start + (T(1)<<i) + lower_start);
-                    c_virtual[parent_virtual-1].push_back(c_virtual[current_virtual-1][remember_start]+G.weights[bag_virtual[i]-1]);
+                    valid_virtual[parent_virtual-1].push_back(higher_start | (Bitops<T>::bit(i)) | lower_start);
+                    c_virtual[parent_virtual-1].push_back(c_virtual[current_virtual-1][remember_start] + G.weights[bag_virtual[i]-1]);
                     if(track_solution)
                     {
                         p_virtual[parent_virtual-1].push_back(p_virtual[current_virtual-1][remember_start]);
@@ -327,18 +328,18 @@ void Smartstorage<T>::take_virtual_step_introduce(
     for(;remember_start <= remember_end; remember_start++)
     {
         T lower_start = valid_virtual[current_virtual-1][remember_start] & lowerbitmask;
-        T higher_start = (valid_virtual[current_virtual-1][remember_start] - lower_start) << 1;
+        T higher_start = (valid_virtual[current_virtual-1][remember_start] & ~lower_start) << 1;
 
-        int j = countr_zero(higher_start + lower_start);
+        int j = Bitops<T>::countr_zero(higher_start | lower_start);
 
         //independentset test                       //CONSIDER BETTER START AND END
-        if(higher_start + lower_start == 0 ||
+        if((higher_start | lower_start) == 0 ||
             (adjacency_row_virtual[j] == 0 &&
             binary_search(valid_virtual[parent_virtual-1].begin(),valid_virtual[parent_virtual-1].end(),
-                    higher_start + (T(1)<<i) +lower_start - (T(1)<<j)) == true))
+                    ((higher_start | (Bitops<T>::bit(i)) | lower_start) & ~(Bitops<T>::bit(j)))) == true))
         {
-            valid_virtual[parent_virtual-1].push_back(higher_start + (T(1)<<i) + lower_start);
-            c_virtual[parent_virtual-1].push_back(c_virtual[current_virtual-1][remember_start]+G.weights[bag_virtual[i]-1]);
+            valid_virtual[parent_virtual-1].push_back(higher_start | (Bitops<T>::bit(i)) | lower_start);
+            c_virtual[parent_virtual-1].push_back(c_virtual[current_virtual-1][remember_start] + G.weights[bag_virtual[i]-1]);
             if(track_solution)
             {
                 p_virtual[parent_virtual-1].push_back(p_virtual[current_virtual-1][remember_start]);
@@ -360,15 +361,15 @@ void Smartstorage<T>::take_virtual_step_forget(const int current_virtual, vector
         p_virtual[parent_virtual-1].resize(0);
     }
 
-    T lowerbitmask = (T(1)<<i) - 1;
+    T lowerbitmask = Bitops<T>::mask_below(i);//////////////////////////////////////////////////////// MAKE BITWISE
     for(size_t current_index = 0; current_index < valid_virtual[current_virtual-1].size(); current_index++)
     {
-        if(! (valid_virtual[current_virtual-1][current_index] & (T(1)<<i)) )   //If bit at i = 0, 
+        if(! (valid_virtual[current_virtual-1][current_index] & (Bitops<T>::bit(i))) )   //If bit at i = 0, 
         {
             T lower = valid_virtual[current_virtual-1][current_index] & lowerbitmask;
-            T higher = (valid_virtual[current_virtual-1][current_index] - lower) >> 1;
+            T higher = (valid_virtual[current_virtual-1][current_index] & ~lower) >> 1;
             
-            valid_virtual[parent_virtual-1].push_back(higher + lower);
+            valid_virtual[parent_virtual-1].push_back(higher | lower);
 
             c_virtual[parent_virtual-1].push_back(c_virtual[current_virtual-1][current_index]);
             if(track_solution)
@@ -380,15 +381,15 @@ void Smartstorage<T>::take_virtual_step_forget(const int current_virtual, vector
     size_t parent_index = 0;
     for(size_t current_index = 0; current_index < valid_virtual[current_virtual-1].size(); current_index++)
     {
-        if(valid_virtual[current_virtual-1][current_index] & (T(1)<<i)) //If bit at i = 1
+        if(valid_virtual[current_virtual-1][current_index] & (Bitops<T>::bit(i))) //If bit at i = 1
         {
             T lower = valid_virtual[parent_virtual-1][parent_index] & lowerbitmask;
-            T higher = (valid_virtual[parent_virtual-1][parent_index] - lower) << 1;
-            while(valid_virtual[current_virtual-1][current_index] != higher + lower + (T(1) << i))            //MAKE SURE TO SKIP SOME CURRENT_indices
+            T higher = (valid_virtual[parent_virtual-1][parent_index] & ~lower) << 1;
+            while(valid_virtual[current_virtual-1][current_index] != (higher | lower | (Bitops<T>::bit(i))))            //MAKE SURE TO SKIP SOME CURRENT_indices
             {
                 parent_index++;
                 lower = valid_virtual[parent_virtual-1][parent_index] & lowerbitmask;
-                higher = (valid_virtual[parent_virtual-1][parent_index] - lower) << 1;
+                higher = (valid_virtual[parent_virtual-1][parent_index] & ~lower) << 1;
             }
             if(c_virtual[current_virtual-1][current_index] > c_virtual[parent_virtual-1][parent_index])
             {

@@ -17,7 +17,8 @@ SRC_FILES = \
 	$(SRC_DIR)/general.cpp $(SRC_DIR)/cli.cpp \
 	$(SRC_DIR)/graph.cpp \
 	$(SRC_DIR)/rootedtree.cpp \
-	$(SRC_DIR)/treedecomp.cpp
+	$(SRC_DIR)/treedecomp.cpp \
+	$(SRC_DIR)/binaryinteger.cpp
 TARGET = $(BUILD_DIR)/mwis_smart
 
 # Default target: Build the executable
