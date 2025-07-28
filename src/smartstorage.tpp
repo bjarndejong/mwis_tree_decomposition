@@ -80,8 +80,8 @@ void Smartstorage<T>::update_current(const int current, const RootedTree& RT)
         for(size_t index = 1; index<validcandidates[current-1].size(); index++)
         {
             int j = countr_zero(validcandidates[current-1][index]);
-            auto it = lower_bound(validcandidates[current-1].begin(),validcandidates[current-1].begin() + index - 1,validcandidates[current-1][index] - (T(1)<<j));
-            w[index] = w[it-validcandidates[current-1].begin()]+G.weights[bags[current-1][j]-1];
+            auto it = lower_bound(validcandidates[current-1].begin(), validcandidates[current-1].begin() + index - 1, validcandidates[current-1][index] - (T(1)<<j));
+            w[index] = w[it-validcandidates[current-1].begin()] + G.weights[bags[current-1][j]-1];
         }
         for(size_t index = 0; index < c[current-1].size(); index++)
             c[current-1][index] -= w[index]*(RT.N[current-1].size()-2 +(current==RT.root));
@@ -98,7 +98,7 @@ template<typename T>
 void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)                            //Chosen method of updating current information to parent information
 {
     int parent = RT.parents[current-1];
-    int neighbourposition = RT.neighbourIterators[parent-1] - RT.N[parent-1].begin();
+    //int neighbourposition = RT.neighbourIterators[parent-1] - RT.N[parent-1].begin();
 
     //cout << "Walking from bag " 
     //    << current << "(" << bags[current-1].size() << "(" << log2(validcandidates[current-1].size()) << ")) to bag " 
@@ -255,7 +255,7 @@ void Smartstorage<T>::take_virtual_step_introduce(
         p_virtual[parent_virtual-1].resize(0);
     }
     //Setup adjacencymatrix for bag_virtual
-    vector<int> adjacency_row_virtual(bag_virtual.size(),0);
+    //vector<int> adjacency_row_virtual(bag_virtual.size(),0);
     T adjacency_mask = 0;
 
     int k = 0;
@@ -267,7 +267,7 @@ void Smartstorage<T>::take_virtual_step_introduce(
             k++;
         if(k<G.N[bag_virtual[i]-1].size() && G.N[bag_virtual[i]-1][k] == bag_virtual[j])
         {
-            adjacency_row_virtual[j] = 1;
+            //adjacency_row_virtual[j] = 1;
             adjacency_mask += (T(1) << j);
         }
     }
@@ -306,7 +306,7 @@ void Smartstorage<T>::take_virtual_step_introduce(
 
                 //Find a lower significant bit than i  such that (higher_start+lower_start + (T(1)<<i) - (T(1)<<j))
                 
-                int j = countr_zero(higher_start + lower_start);
+                //int j = countr_zero(higher_start + lower_start);
                 
                 //independentset test
                 if(higher_start + lower_start == 0 ||
@@ -335,7 +335,7 @@ void Smartstorage<T>::take_virtual_step_introduce(
         T lower_start = valid_virtual[current_virtual-1][remember_start] & lowerbitmask;
         T higher_start = (valid_virtual[current_virtual-1][remember_start] - lower_start) << 1;
 
-        int j = countr_zero(higher_start + lower_start);
+        //int j = countr_zero(higher_start + lower_start);
 
         //independentset test                       //CONSIDER BETTER START AND END
         if(higher_start + lower_start == 0 ||
@@ -416,7 +416,7 @@ template<typename T>
 void Smartstorage<T>::initialize_leaf(const int current, const RootedTree& RT)
 {
     int parent = current;
-    int neighbourposition = RT.neighbourIterators[parent-1] - RT.N[parent-1].begin();
+    //int neighbourposition = RT.neighbourIterators[parent-1] - RT.N[parent-1].begin();
 
     //cout << "Initializing bag " << current << "(" << bags[current-1].size() << ")" << endl;
 
@@ -444,7 +444,7 @@ void Smartstorage<T>::initialize_leaf(const int current, const RootedTree& RT)
     vector<int> intersection_bag;
     set_intersection(source_bag.begin(), source_bag.end(),target_bag.begin(), target_bag.end(),back_inserter(intersection_bag));
 
-    vector<int>::const_iterator it_source_bag = source_bag.begin();
+    //vector<int>::const_iterator it_source_bag = source_bag.begin();
     vector<int>::const_iterator it_intersection_bag = intersection_bag.begin();
 
 
