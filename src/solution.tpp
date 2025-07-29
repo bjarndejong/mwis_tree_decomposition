@@ -41,13 +41,23 @@ void Solution<T>::discover(const int current, const RootedTree& RT)
     int neighbourposition = RT.neighbourIterators[parent-1] - RT.N[parent-1].begin();
 
     //Set up adjacency matrix for current bag
-    vector<vector<int>> adjacency_matrix(S.bags[current-1].size(),vector<int>(S.bags[current-1].size(),0));
+    //vector<vector<int>> adjacency_matrix(S.bags[current-1].size(),vector<int>(S.bags[current-1].size(),0));
+    vector<T> adjacency_masks(S.bags[current-1].size(),T(0));
     for(int i = 0; i< S.bags[current-1].size(); i++)
     {
-        for(int j = 0; j<S.bags[current-1].size(); j++)
+        int k = 0; //Iterates through the neighbourhood of S.bags[current-1][i]
+        for(int j = 0; j<i/*S.bags[current-1].size()*/; j++)
         {
-            if(S.G.adjacent(S.bags[current-1][i],S.bags[current-1][j]))
-                adjacency_matrix[i][j] = 1;
+            while(k < S.G.N[S.bags[current-1][i]-1].size() && S.G.N[S.bags[current-1][i]-1][k] < S.bags[current-1][j])
+                k++;
+            if(k < S.G.N[S.bags[current-1][i]-1].size() && S.G.N[S.bags[current-1][i]-1][k] == S.bags[current-1][j])
+            {
+
+
+            //if(S.G.adjacent(S.bags[current-1][i],S.bags[current-1][j]))
+                //adjacency_matrix[i][j] = 1;
+                adjacency_masks[i] |= (T(1) << j);
+            }
         }
     }
 
@@ -56,21 +66,22 @@ void Solution<T>::discover(const int current, const RootedTree& RT)
     for(int i = 0; i<S.bags[current-1].size(); i++)
     {
         int vSize = validcandidates.size();
-        validcandidates.push_back(T(1)<<i);
-        for(int index = 1; index<vSize; index++)
+        //validcandidates.push_back(T(1)<<i);
+        for(int index = 0; index<vSize; index++)
         {
             //add validcandidates[index]+(T(1)<<i) if it is an independent set
-            int j = countr_zero(validcandidates[index]);
+            //int j = countr_zero(validcandidates[index]);
 
             if(
-                binary_search(validcandidates.begin(),    //CONSIDER DIFFERENT START AND END
-                    validcandidates.end(),
-                    validcandidates[index] + (T(1)<<i) - (T(1)<<j)) == true
-                    &&
-                    adjacency_matrix[i][j]==0
+                //binary_search(validcandidates.begin(),    //CONSIDER DIFFERENT START AND END
+                //    validcandidates.end(),
+                //    validcandidates[index] + (T(1)<<i) - (T(1)<<j)) == true
+                //    &&
+                //    adjacency_matrix[i][j]==0
+                (adjacency_masks[i] & validcandidates[index]) == 0
             )
             {
-                validcandidates.push_back(validcandidates[index]+(T(1)<<i));
+                validcandidates.push_back(validcandidates[index] | (T(1)<<i));
                 //cout << current << ": " << validcandidates.size() << endl;
             }
         }

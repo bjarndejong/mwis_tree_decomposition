@@ -105,6 +105,7 @@ int main(int argc, char* argv[])
             bind(&Solution<__uint128_t>::cleanup, &MWIS, placeholders::_1)
         );
         print_vector(MWIS.MWIS);
+        //cout << G.weight_set(MWIS.MWIS) << endl;
     }
     return 0;
 }
