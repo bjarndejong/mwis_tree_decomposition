@@ -5,6 +5,7 @@
 #include <sstream>
 #include <iostream>
 #include <algorithm>
+#include <vector>
 
 using namespace std;
 
@@ -14,7 +15,7 @@ Graph::Graph(vector<vector<int>>&& N, vector<int>&& weights)
 
 }
 
-Graph Graph::from_file(const std::string& ifname)                   // Static factory method
+Graph Graph::from_file(const string& ifname)                   // Static factory method
 {
     ifstream ifs{ifname};
     if (!ifs)
@@ -76,7 +77,7 @@ void Graph::print() const
 }
 
 
-bool Graph::independent_set(const std::vector<int>& subset) const
+bool Graph::independent_set(const vector<int>& subset) const
 {
     for(std::vector<int>::const_iterator it1 = subset.begin(); it1!=subset.end(); it1++)
         for(std::vector<int>::const_iterator it2 = it1+1; it2 != subset.end(); it2++)
@@ -90,7 +91,7 @@ bool Graph::adjacent(int u, int v) const
     return binary_search(N[u-1].begin(),N[u-1].end(),v);
 }
 
-int Graph::weight_set(const std::vector<int>& subset) const
+int Graph::weight_set(const vector<int>& subset) const
 {
     int accumulated_weight = 0;
     for(std::vector<int>::const_iterator it = subset.begin(); it != subset.end(); it++)
