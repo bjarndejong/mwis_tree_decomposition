@@ -14,7 +14,7 @@ Graph::Graph(vector<vector<int>>&& N, vector<int>&& weights)
 
 }
 
-Graph Graph::from_file(const std::string& ifname)                   // Static factory method
+Graph Graph::from_file(const string& ifname)                   // Static factory method
 {
     ifstream ifs{ifname};
     if (!ifs)
