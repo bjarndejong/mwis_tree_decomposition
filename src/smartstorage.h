@@ -16,12 +16,20 @@ class Smartstorage
 public:
     const bool track_solution;
     const bool store_c;
+
     std::vector<std::vector<T>> validcandidates;
+    std::vector<std::vector<T>> domination;
+
     std::vector<std::vector<int>> c;
     std::vector<std::vector<std::vector<int>>> p;
 
+    
+
     const Graph& G;
+
     const std::vector<std::vector<int>>& bags;
+    std::vector<std::vector<int>> neighbours_forgotten;
+    std::vector<int> neighbours_present;
 
     Smartstorage(const Graph& G, const std::vector<std::vector<int>>& BAGS, const bool& store_c, const bool& track_solution);
 

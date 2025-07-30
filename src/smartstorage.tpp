@@ -27,7 +27,12 @@ template<typename T>
 void Smartstorage<T>::setup(const RootedTree& RT)
 {
     validcandidates.resize(RT.N.size());
+    domination.resize(RT.N.size());
     c.resize(RT.N.size());
+
+    neighbours_forgotten = vector(G.N.size(),0);
+    neighbours_present = vector(G.N.size(),0);
+
     if(track_solution)
     {
         p.resize(RT.N.size());
@@ -166,6 +171,7 @@ void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)
     begin_virtual_path(current, RT, c_virtual[current_virtual-1], p_virtual[current_virtual-1], valid_virtual[current_virtual-1]);
 
     vector<int> bag_virtual = source_bag;
+    vector<int> neighbours_forgotten_virtual;
 
     vector<int> intersection_bag;
     set_intersection(source_bag.begin(), source_bag.end(),target_bag.begin(), target_bag.end(),back_inserter(intersection_bag));
@@ -291,12 +297,16 @@ template<typename T>
 void Smartstorage<T>::take_virtual_step_introduce(
     const int current_virtual, vector<vector<int>>& c_virtual, vector<vector<int>>& p_virtual, 
     const int i, 
-    const vector<int>& bag_virtual, vector<vector<T>>& valid_virtual)
+    const vector<int>& bag_virtual, //vector<int>& forgotten_virtual
+    vector<vector<T>>& valid_virtual)
 {
     int parent_virtual = (current_virtual%2) + 1;
 
     valid_virtual[parent_virtual-1].resize(0);
+    domination_virtual[parent_virtual-1].resize(0);
     c_virtual[parent_virtual-1].resize(0);
+
+
     if(track_solution)
     {
         p_virtual[parent_virtual-1].resize(0);
@@ -304,6 +314,7 @@ void Smartstorage<T>::take_virtual_step_introduce(
     //Setup adjacencymatrix for bag_virtual
     //vector<int> adjacency_row_virtual(bag_virtual.size(),0);
     T adjacency_mask = 0;
+    T neighbourhoodsaturation_mask = 0;
 
     int k = 0;
     for(int j = 0; j < bag_virtual.size(); j++)
@@ -314,8 +325,16 @@ void Smartstorage<T>::take_virtual_step_introduce(
         {
             //adjacency_row_virtual[j] = 1;
             adjacency_mask |= (T(1) << j);
+            neighbours_present[bag_virtual[i]-1]++;
+            neighbours_present[bag_virtual[j]-1]++;
+            if(neighbours_forgotten[bag_virtual[j]-1] + neighbours_present[bag_virtual[j]-1] == G.N[bag_virtual[j]-1].size())
+                neighbourhoodsaturation_mask |= (T(1) << j);
+
         }
     }
+    if(neighbours_forgotten[bag_virtual[i]-1] + neighbours_present[bag_virtual[i]-1] == G.N[bag_virtual[i]-1].size())
+        neighbourhoodsaturation_mask |= (T(1) << i);
+
     size_t remember_start = 0;
     size_t remember_end = 0;
 
@@ -329,17 +348,23 @@ void Smartstorage<T>::take_virtual_step_introduce(
         T lower_start = valid_virtual[current_virtual-1][remember_start] & lowerbitmask;
         T higher_start = (valid_virtual[current_virtual-1][remember_start] - lower_start) << 1;
 
-        //if(valid_virtual[current_virtual-1][current_index] - valid_virtual[current_virtual-1][remember_start] < (T(1)<<i))
-        //if(higher + lower - higher_start + lower_start < (T(1)<<i))
         if(higher == higher_start)
         {
-            valid_virtual[parent_virtual-1].push_back(higher | lower);
-            c_virtual[parent_virtual-1].push_back(c_virtual[current_virtual-1][current_index]);
-            if(track_solution)
+            T domination_lower = domination_virtual[current_virtual-1][current_index] & lowerbitmask;
+            T domination_higher = (domination_virtual[current_virtual-1][current_index] - domination_lower) << 1;
+
+            bool domination_status = (T((lower+higher) & adjacency_mask) != 0);
+            if(((domination_higher + (T(domination_status)<< i) + domination_lower) & neighbourhoodsaturation_mask) == neighbourhoodsaturation_mask)
             {
-                p_virtual[parent_virtual-1].push_back(p_virtual[current_virtual-1][current_index]);
+                valid_virtual[parent_virtual-1].push_back(higher | lower);  //PUSH A ZERO, MAKE CONDITIONAL
+                domination_virtual[parent_virtual-1].push_back(domination_lower+ (T(domination_status)<< i) +domination_higher);
+                c_virtual[parent_virtual-1].push_back(c_virtual[current_virtual-1][current_index]);
+                if(track_solution)
+                {
+                    p_virtual[parent_virtual-1].push_back(p_virtual[current_virtual-1][current_index]);
+                }
             }
-            remember_end = current_index;       // -,]
+            remember_end = current_index;
             current_index++;
         }
         else
@@ -349,20 +374,13 @@ void Smartstorage<T>::take_virtual_step_introduce(
                 T lower_start = valid_virtual[current_virtual-1][remember_start] & lowerbitmask;
                 T higher_start = (valid_virtual[current_virtual-1][remember_start] - lower_start) << 1;
 
-                //Find a lower significant bit than i  such that (higher_start+lower_start + (T(1)<<i) - (T(1)<<j))
-                
-                //int j = countr_zero(higher_start + lower_start);
-                
-                //independentset test
-                if( //higher_start + lower_start == 0 ||
-                    //(adjacency_row_virtual[j] == 0 &&
-                    //binary_search(valid_virtual[parent_virtual-1].begin(),    //CONSIDER DIFFERENT START AND END
-                    //valid_virtual[parent_virtual-1].end(),
-                    //higher_start + (T(1)<<i) +lower_start - (T(1)<<j)) == true))  
-                    (adjacency_mask & (higher_start | lower_start)) == 0
-                )  
+                T domination_lower = domination_virtual[current_virtual-1][remember_start] & lowerbitmask;
+                T domination_higher = (domination_virtual[current_virtual-1][remember_start] - domination_lower) << 1;
+
+                if((adjacency_mask & (higher_start | lower_start)) == 0)  
                 {
                     valid_virtual[parent_virtual-1].push_back(higher_start | (T(1)<<i) | lower_start);
+                    domination_virtual[parent_virtual-1].push_back((domination_lower + (T(1)<<i) + domination_higher) | adjacency_mask);
                     c_virtual[parent_virtual-1].push_back(c_virtual[current_virtual-1][remember_start] + G.weights[bag_virtual[i]-1]);
                     if(track_solution)
                     {
@@ -380,17 +398,13 @@ void Smartstorage<T>::take_virtual_step_introduce(
         T lower_start = valid_virtual[current_virtual-1][remember_start] & lowerbitmask;
         T higher_start = (valid_virtual[current_virtual-1][remember_start] - lower_start) << 1;
 
-        //int j = countr_zero(higher_start + lower_start);
+        T domination_lower = domination_virtual[current_virtual-1][remember_start] & lowerbitmask;
+        T domination_higher = (domination_virtual[current_virtual-1][remember_start] - domination_lower) << 1;
 
-        //independentset test                       //CONSIDER BETTER START AND END
-        if( //higher_start + lower_start == 0 ||
-            //(adjacency_row_virtual[j] == 0 &&
-            //binary_search(valid_virtual[parent_virtual-1].begin(),valid_virtual[parent_virtual-1].end(),
-            //        higher_start + (T(1)<<i) +lower_start - (T(1)<<j)) == true))
-            (adjacency_mask & (higher_start | lower_start)) == 0
-        )
+        if((adjacency_mask & (higher_start | lower_start)) == 0)
         {
             valid_virtual[parent_virtual-1].push_back(higher_start | (T(1)<<i) | lower_start);
+            domination_virtual[parent_virtual-1].push_back((domination_lower + (T(1)<<i) + domination_higher) | adjacency_mask);
             c_virtual[parent_virtual-1].push_back(c_virtual[current_virtual-1][remember_start]+G.weights[bag_virtual[i]-1]);
             if(track_solution)
             {
