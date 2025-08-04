@@ -280,17 +280,22 @@ void Smartstorage<T>::take_virtual_step_introduce(
     valid_virtual[parent_virtual-1].resize(0);
     domination_virtual[parent_virtual-1].resize(0);
     c_virtual[parent_virtual-1].resize(0);
+    w_virtual[parent_virtual-1].resize(0);
+
     if(track_solution)
     {
         p_virtual[parent_virtual-1].resize(0);
     }
+    vector<int> number_of_neighbours_forgotten; // Passed
+    vector<int> number_of_neighbours_present;   // Passed
+    number_of_neighbours_forgotten.insert(number_of_neighbours_forgotten.begin()+i, 0);
+    number_of_neighbours_present.insert(number_of_neigbours_present.begin()+i, 0);
+
+    T adjacency_mask = 0;
+    T all_neighbours_accounted_mask = 0;
 
     
 
-    T adjacency_mask = 0;
-    T neighbourhoodsaturation_mask = 0;
-
-    vector
 
     int k = 0;
     for(int j = 0; j < bag_virtual.size(); j++)
@@ -299,17 +304,17 @@ void Smartstorage<T>::take_virtual_step_introduce(
             k++;
         if(k<G.N[bag_virtual[i]-1].size() && G.N[bag_virtual[i]-1][k] == bag_virtual[j])
         {
-            //adjacency_row_virtual[j] = 1;
             adjacency_mask |= (T(1) << j);
-            neighbours_present[bag_virtual[i]-1]++;
-            neighbours_present[bag_virtual[j]-1]++;
-            if(neighbours_forgotten[bag_virtual[j]-1] + neighbours_present[bag_virtual[j]-1] == G.N[bag_virtual[j]-1].size())
-                neighbourhoodsaturation_mask |= (T(1) << j);
-
+            number_of_neighbours_present[i]++;
+            number_of_neighbours_present[j]++;
         }
+        // Moved it outside of above if statement
+        if(number_of_neighbours_forgotten[j] + number_of_neighbours_present[j] ==  G.N[bag_virtual[j]-1].size())
+            all_neighbours_accounted_mask |= (T(1) << j);
     }
-    if(neighbours_forgotten[bag_virtual[i]-1] + neighbours_present[bag_virtual[i]-1] == G.N[bag_virtual[i]-1].size())
-        neighbourhoodsaturation_mask |= (T(1) << i);
+    //if(neighbours_forgotten[bag_virtual[i]-1] + neighbours_present[bag_virtual[i]-1] == G.N[bag_virtual[i]-1].size())
+    if(number_of_neighbours_forgotten[i] + number_of_neighbours_present[i] ==  G.N[bag_virtual[i]-1].size())
+        all_neighbours_accounted_mask |= (T(1) << i);
 
     size_t remember_start = 0;
     size_t remember_end = 0;
@@ -330,11 +335,12 @@ void Smartstorage<T>::take_virtual_step_introduce(
             T domination_higher = (domination_virtual[current_virtual-1][current_index] - domination_lower) << 1;
 
             bool domination_status = (T((lower+higher) & adjacency_mask) != 0);
-            if(((domination_higher + (T(domination_status)<< i) + domination_lower) & neighbourhoodsaturation_mask) == neighbourhoodsaturation_mask)
+            if(((domination_higher + (T(domination_status)<< i) + domination_lower) & all_neighbours_accounted_mask) == all_neighbours_accounted_mask)
             {
                 valid_virtual[parent_virtual-1].push_back(higher | lower);  //PUSH A ZERO, MAKE CONDITIONAL
-                domination_virtual[parent_virtual-1].push_back(domination_lower+ (T(domination_status)<< i) +domination_higher);
+                domination_virtual[parent_virtual-1].push_back(domination_higher + (T(domination_status)<< i) + domination_lower);
                 c_virtual[parent_virtual-1].push_back(c_virtual[current_virtual-1][current_index]);
+                w_virtual[parent_virtual-1].push_back(w_virtual[current_virtual-1][current_index]);
                 if(track_solution)
                 {
                     p_virtual[parent_virtual-1].push_back(p_virtual[current_virtual-1][current_index]);
@@ -356,8 +362,9 @@ void Smartstorage<T>::take_virtual_step_introduce(
                 if((adjacency_mask & (higher_start | lower_start)) == 0)  
                 {
                     valid_virtual[parent_virtual-1].push_back(higher_start | (T(1)<<i) | lower_start);
-                    domination_virtual[parent_virtual-1].push_back((domination_lower + (T(1)<<i) + domination_higher) | adjacency_mask);
+                    domination_virtual[parent_virtual-1].push_back((domination_higher + (T(1)<<i) + domination_lower) | adjacency_mask);
                     c_virtual[parent_virtual-1].push_back(c_virtual[current_virtual-1][remember_start] + G.weights[bag_virtual[i]-1]);
+                    w_virtual[parent_virtual-1].push_back(w_virtual[current_virtual-1][remember_start] + G.weights[bag_virtual[i]-1]);
                     if(track_solution)
                     {
                         p_virtual[parent_virtual-1].push_back(p_virtual[current_virtual-1][remember_start]);
@@ -380,8 +387,9 @@ void Smartstorage<T>::take_virtual_step_introduce(
         if((adjacency_mask & (higher_start | lower_start)) == 0)
         {
             valid_virtual[parent_virtual-1].push_back(higher_start | (T(1)<<i) | lower_start);
-            domination_virtual[parent_virtual-1].push_back((domination_lower + (T(1)<<i) + domination_higher) | adjacency_mask);
+            domination_virtual[parent_virtual-1].push_back((domination_higher + (T(1)<<i) + domination_lower) | adjacency_mask);
             c_virtual[parent_virtual-1].push_back(c_virtual[current_virtual-1][remember_start]+G.weights[bag_virtual[i]-1]);
+            w_virtual[parent_virtual-1].push_back(w_virtual[current_virtual-1][remember_start]+G.weights[bag_virtual[i]-1]);
             if(track_solution)
             {
                 p_virtual[parent_virtual-1].push_back(p_virtual[current_virtual-1][remember_start]);
@@ -396,14 +404,38 @@ void Smartstorage<T>::take_virtual_step_forget(const int current_virtual, vector
     const vector<int>& bag_virtual, vector<vector<T>>& valid_virtual)
 {
     int parent_virtual = (current_virtual%2) + 1;
+
     valid_virtual[parent_virtual-1].resize(0);
+    domination_virtual[parent_virtual-1].resize(0);
     c_virtual[parent_virtual-1].resize(0);
     if(track_solution)
     {
         p_virtual[parent_virtual-1].resize(0);
     }
 
+    vector<int> number_of_neighbours_forgotten;
+    vector<int> number_of_neighbours_present;
+
+    number_of_forgotten_neighbours.erase(number_of_neighbours_forgotten.begin()+i);
+    number_of_neighbours_present.erase(number_of_neighbours_present.begin()+i);
+
+    //For all neighbours of whatever that i-th vertex was, do sth
+
     T lowerbitmask = (T(1)<<i) - 1;
+    // Do two walks through the vector simultaneously, similar as to a merge.
+
+    size_t current_index_zero = 0;
+    size_t current_index_one = 0;
+
+    while(current_index_zero != valid_virtual[current_virtual-1].size() && current_index_one != valid_virtual[current_virtual-1].size())
+    {
+        while((valid_virtual[current_virtual-1][current_index_zero] & (T(1)<<i)) != 0)
+            current_index_zero++;
+        while((valid_virtual[current_virtual-1][current_index_one] & (T(1)<<i)) == 0)
+            current_index_one++;
+        if(valid_virtual[current_virtual-1][current_index_zero] <= valid_virtual)
+    }
+
     for(size_t current_index = 0; current_index < valid_virtual[current_virtual-1].size(); current_index++)
     {
         if(! (valid_virtual[current_virtual-1][current_index] & (T(1)<<i)) )   //If bit at i = 0, 
