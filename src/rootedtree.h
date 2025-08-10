@@ -7,17 +7,19 @@
 
 class RootedTree
 {
+private:
+    void initialize();
 public:
-    const std::vector<std::vector<int>>& N;
-    const int number_of_nodes;
+    const std::vector<std::vector<int>> N;
     int root;
 
     std::vector<int> parents;
-
     std::vector<std::vector<int>::const_iterator> neighbourIterators;               //REPRESENTS THE STATE OF THE ROOTED TREE
 
     //Order of initialization list relevant, therefore odd naming
-    RootedTree(const std::vector<std::vector<int>>& ADJ, int root);
+    RootedTree(std::vector<std::vector<int>>&& ADJ, int root);              // Move constructor
+    RootedTree(const std::vector<std::vector<int>>& ADJ, int root);         // Copy constructor
+    RootedTree(const RootedTree& other);                                    // Copy-assign constructor
 
     /*
     void df_traversal(
@@ -27,9 +29,8 @@ public:
         std::function<void(const RootedTree&)> cleanup
                       );
     */
-
-    template<typename SetupFunction, typename DiscoverFunction, typename FinishFunction, typename CleanupFunction>
-    void df_traversal(
+   template<typename SetupFunction, typename DiscoverFunction, typename FinishFunction, typename CleanupFunction>
+   void df_traversal(
         SetupFunction setup,
         DiscoverFunction discover,
         FinishFunction finish,
@@ -39,6 +40,7 @@ public:
 
     void reroot(const int newroot);
 
+    void print() const;
 };
 
 #include "rootedtree.tpp"

@@ -19,7 +19,7 @@ template<typename T>
 Smartstorage<T>::Smartstorage(const Graph& G, const vector<std::vector<int>>& BAGS, const bool& store_c, const bool& track_solution)
 : G(G), bags(BAGS), store_c(store_c), track_solution(track_solution)
 {
-
+    
 }
 
 //Tree events
@@ -29,9 +29,10 @@ void Smartstorage<T>::setup(const RootedTree& RT)
     validcandidates.resize(RT.N.size());
     domination.resize(RT.N.size());
     c.resize(RT.N.size());
+    w.resize(RT.N.size());
 
-    neighbours_forgotten.resize(RT.N.size());
-    neighbours_present.resize(RT.N.size());
+    number_of_neighbours_forgotten.resize(RT.N.size());
+    number_of_neighbours_present.resize(RT.N.size());
 
     if(track_solution)
     {
@@ -53,9 +54,44 @@ void Smartstorage<T>::finish(const int current, const RootedTree& RT)
 {
     if((RT.N[current-1].size() == 1 && current != RT.root) || (current == RT.root && RT.N[current-1].size() == 0))
     {
+        //cout << "Initializing " << current << endl;
         initialize_leaf(current,RT);
+
+        //cout << "Bag:" << endl;
+        //print_vector(bags[current-1]);
+        //cout << "Forgotten:" << endl;
+        //print_vector(number_of_neighbours_forgotten[current-1]);
+        //cout << "Present:" << endl;
+        //print_vector(number_of_neighbours_present[current-1]);
+        //cout << "Valid:" << endl;
+        //print_vector(validcandidates[current-1]);
+        //cout << "Domination:" << endl;
+        //print_vector(domination[current-1]);
+        //cout << "c:" << endl;
+        //print_vector(c[current-1]);
+        //cout << "w:" << endl;
+        //print_vector(w[current-1]);
+        //cout << endl;
     }
+
     update_current(current, RT);
+    cout << "After updating " << current << endl;
+    cout << "Bag:" << endl;
+    print_vector(bags[current-1]);
+    cout << "Forgotten:" << endl;
+    print_vector(number_of_neighbours_forgotten[current-1]);
+    cout << "Present:" << endl;
+    print_vector(number_of_neighbours_present[current-1]);
+    cout << "Valid:" << endl;
+    print_vector(validcandidates[current-1]);
+    cout << "Domination:" << endl;
+    print_vector(domination[current-1]);
+    cout << "c:" << endl;
+    print_vector(c[current-1]);
+    cout << "w:" << endl;
+    print_vector(w[current-1]);
+    cout << endl;
+    
     if(current != RT.root)
     {
         update_to_parent(current, RT);
@@ -84,7 +120,7 @@ void Smartstorage<T>::update_current(const int current, const RootedTree& RT)
         //    auto it = lower_bound(validcandidates[current-1].begin(), validcandidates[current-1].begin() + index - 1, validcandidates[current-1][index] - (T(1)<<j));
         //    w[index] = w[it-validcandidates[current-1].begin()] + G.weights[bags[current-1][j]-1];
         //}
-        */
+        
         vector<T> adjacency_masks(bags[current-1].size(),T(0));
         for(int i = 0; i< bags[current-1].size(); i++)
         {
@@ -115,8 +151,9 @@ void Smartstorage<T>::update_current(const int current, const RootedTree& RT)
                 }
             }
         }
+            */
         for(size_t index = 0; index < c[current-1].size(); index++)
-            c[current-1][index] -= w[index]*(RT.N[current-1].size()-2 + (current==RT.root));
+            c[current-1][index] -= w[current-1][index]*(RT.N[current-1].size()-2 + (current==RT.root));
     }
 }
 
@@ -141,6 +178,7 @@ void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)
 
 
     vector<vector<int>> c_virtual(2);
+    vector<vector<int>> w_virtual(2);
     vector<vector<int>> p_virtual(2);       //P
     vector<vector<T>> valid_virtual(2);
     vector<vector<T>> domination_virtual(2);
@@ -148,10 +186,16 @@ void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)
     vector<vector<int>> neihbours_forgotten_virtual(2);
     vector<vector<int>> neighbours_present_virtual(2);
 
-    begin_virtual_path(current, RT, c_virtual[current_virtual-1], p_virtual[current_virtual-1], valid_virtual[current_virtual-1]);
+    begin_virtual_path(current, RT, 
+        valid_virtual[current_virtual-1],
+        domination_virtual[current_virtual-1],
+        c_virtual[current_virtual-1],
+        w_virtual[current_virtual-1],
+        p_virtual[current_virtual-1]);
 
     vector<int> bag_virtual = source_bag;
-    vector<int> neighbours_forgotten_virtual;
+    vector<int> number_of_neighbours_forgotten_virtual = number_of_neighbours_forgotten[current-1];
+    vector<int> number_of_neighbours_present_virtual = number_of_neighbours_present[current-1];
 
     vector<int> intersection_bag;
     set_intersection(source_bag.begin(), source_bag.end(),target_bag.begin(), target_bag.end(),back_inserter(intersection_bag));
@@ -182,9 +226,35 @@ void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)
 
                     int i = it_source_bag-source_bag.begin()-forgotten_so_far;
 
-                    take_virtual_step_forget(current_virtual, c_virtual, p_virtual, i, bag_virtual, valid_virtual);
-
+                    take_virtual_step_forget(current_virtual, 
+                        valid_virtual,
+                        domination_virtual,
+                        c_virtual, 
+                        w_virtual,
+                        p_virtual, 
+                        i, 
+                        *it_source_bag,
+                        bag_virtual, 
+                        number_of_neighbours_forgotten_virtual, 
+                        number_of_neighbours_present_virtual);
                     swap(current_virtual, parent_virtual);
+
+                    cout << "After forgetting " << *it_source_bag << endl;
+                    cout << "Bag:" << endl;
+                    print_vector(bag_virtual);
+                    cout << "Forgotten:" << endl;
+                    print_vector(number_of_neighbours_forgotten_virtual);
+                    cout << "Present:" << endl;
+                    print_vector(number_of_neighbours_present_virtual);
+                    cout << "Valid:" << endl;
+                    print_vector(valid_virtual[current_virtual-1]);
+                    cout << "Domination:" << endl;
+                    print_vector(domination_virtual[current_virtual-1]);
+                    cout << "c:" << endl;
+                    print_vector(c_virtual[current_virtual-1]);
+                    cout << "w:" << endl;
+                    print_vector(w_virtual[current_virtual-1]);
+                    cout << endl;
                 }//END FORGET BLOCK
                 //cout << bag_virtual.size() << " " << log2(valid_virtual[current_virtual-1].size()) << endl;
                 forgotten_so_far++;
@@ -201,7 +271,18 @@ void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)
 
             int i = it_source_bag-source_bag.begin()-forgotten_so_far;
 
-            take_virtual_step_forget(current_virtual, c_virtual, p_virtual, i, bag_virtual, valid_virtual);
+            take_virtual_step_forget(current_virtual, 
+                valid_virtual,
+                domination_virtual,
+                c_virtual, 
+                w_virtual,
+                p_virtual, 
+                i, 
+                *it_source_bag,
+                bag_virtual,
+                number_of_neighbours_forgotten_virtual,
+                number_of_neighbours_present_virtual
+            );
             swap(current_virtual, parent_virtual);
         }//END FORGET BLOCK
         forgotten_so_far++;
@@ -236,7 +317,17 @@ void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)
 
                     int i = it_intersection_bag-intersection_bag.begin()+introduced_so_far;
 
-                    take_virtual_step_introduce(current_virtual, c_virtual, p_virtual, i, bag_virtual, valid_virtual);
+                    take_virtual_step_introduce(current_virtual, 
+                        valid_virtual,
+                        domination_virtual,
+                        c_virtual, 
+                        w_virtual,
+                        p_virtual, 
+                        i, 
+                        bag_virtual, 
+                        number_of_neighbours_forgotten_virtual,
+                        number_of_neighbours_present_virtual
+                    );
                     swap(current_virtual,parent_virtual);
                 }//END INTRODUCE BLOCK
                 introduced_so_far++;
@@ -254,26 +345,51 @@ void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)
 
             int i = it_intersection_bag-intersection_bag.begin()+introduced_so_far;     //Relevant bitposition
 
-            take_virtual_step_introduce(current_virtual, c_virtual, p_virtual, i, bag_virtual, valid_virtual);
+            take_virtual_step_introduce(current_virtual, 
+                valid_virtual,
+                domination_virtual,
+                c_virtual,
+                w_virtual,
+                p_virtual, 
+                i, 
+                bag_virtual,
+                number_of_neighbours_forgotten_virtual,
+                number_of_neighbours_present_virtual 
+            );
             swap(current_virtual, parent_virtual);
 
         }//END INTRODUCE BLOCK
         introduced_so_far++;
         it_target_bag++;
     }
-    if(store_c)
-        end_virtual_path(current, RT, c_virtual[current_virtual-1], p_virtual[current_virtual-1], valid_virtual[current_virtual-1]);
-    else
-        end_virtual_path_no_files(current, RT, c_virtual[current_virtual-1], p_virtual[current_virtual-1], valid_virtual[current_virtual-1]);
+    //if(store_c)
+    //    end_virtual_path(current, RT, c_virtual[current_virtual-1], p_virtual[current_virtual-1], valid_virtual[current_virtual-1]);
+    //else
+    end_virtual_path_no_files(current, RT, 
+        valid_virtual[current_virtual-1],
+        domination_virtual[current_virtual-1],
+        c_virtual[current_virtual-1],
+        w_virtual[current_virtual-1], 
+        p_virtual[current_virtual-1],
+        number_of_neighbours_forgotten_virtual,
+        number_of_neighbours_present_virtual
+    );
 }
 
 
 template<typename T>
 void Smartstorage<T>::take_virtual_step_introduce(
-    const int current_virtual, vector<vector<int>>& c_virtual, vector<vector<int>>& p_virtual, 
-    const int i, 
-    const vector<int>& bag_virtual, //vector<int>& forgotten_virtual
-    vector<vector<T>>& valid_virtual)
+    const int current_virtual, 
+    vector<vector<T>>& valid_virtual,
+    vector<vector<T>>& domination_virtual,
+    vector<vector<int>>& c_virtual, 
+    vector<vector<int>>& w_virtual,
+    vector<vector<int>>& p_virtual, 
+    const int i,
+    const vector<int>& bag_virtual,
+    vector<int>& number_of_neighbours_forgotten_virtual,
+    vector<int>& number_of_neighbours_present_virtual
+    )
 {
     int parent_virtual = (current_virtual%2) + 1;
 
@@ -286,16 +402,12 @@ void Smartstorage<T>::take_virtual_step_introduce(
     {
         p_virtual[parent_virtual-1].resize(0);
     }
-    vector<int> number_of_neighbours_forgotten; // Passed
-    vector<int> number_of_neighbours_present;   // Passed
-    number_of_neighbours_forgotten.insert(number_of_neighbours_forgotten.begin()+i, 0);
-    number_of_neighbours_present.insert(number_of_neigbours_present.begin()+i, 0);
+
+    number_of_neighbours_forgotten_virtual.insert(number_of_neighbours_forgotten_virtual.begin()+i, 0); // Move to walk_virtual_path
+    number_of_neighbours_present_virtual.insert(number_of_neighbours_present_virtual.begin()+i, 0);      // Move to walk_virtual_path
 
     T adjacency_mask = 0;
     T all_neighbours_accounted_mask = 0;
-
-    
-
 
     int k = 0;
     for(int j = 0; j < bag_virtual.size(); j++)
@@ -305,15 +417,15 @@ void Smartstorage<T>::take_virtual_step_introduce(
         if(k<G.N[bag_virtual[i]-1].size() && G.N[bag_virtual[i]-1][k] == bag_virtual[j])
         {
             adjacency_mask |= (T(1) << j);
-            number_of_neighbours_present[i]++;
-            number_of_neighbours_present[j]++;
+            number_of_neighbours_present_virtual[i]++;
+            number_of_neighbours_present_virtual[j]++;
         }
         // Moved it outside of above if statement
-        if(number_of_neighbours_forgotten[j] + number_of_neighbours_present[j] ==  G.N[bag_virtual[j]-1].size())
+        if(number_of_neighbours_forgotten_virtual[j] + number_of_neighbours_present_virtual[j] ==  G.N[bag_virtual[j]-1].size())
             all_neighbours_accounted_mask |= (T(1) << j);
     }
-    //if(neighbours_forgotten[bag_virtual[i]-1] + neighbours_present[bag_virtual[i]-1] == G.N[bag_virtual[i]-1].size())
-    if(number_of_neighbours_forgotten[i] + number_of_neighbours_present[i] ==  G.N[bag_virtual[i]-1].size())
+    // number_of_neighbours_present[i] only fully updated after loop(doing it extra for i in loop is fine)
+    if(number_of_neighbours_forgotten_virtual[i] + number_of_neighbours_present_virtual[i] ==  G.N[bag_virtual[i]-1].size())
         all_neighbours_accounted_mask |= (T(1) << i);
 
     size_t remember_start = 0;
@@ -337,7 +449,7 @@ void Smartstorage<T>::take_virtual_step_introduce(
             bool domination_status = (T((lower+higher) & adjacency_mask) != 0);
             if(((domination_higher + (T(domination_status)<< i) + domination_lower) & all_neighbours_accounted_mask) == all_neighbours_accounted_mask)
             {
-                valid_virtual[parent_virtual-1].push_back(higher | lower);  //PUSH A ZERO, MAKE CONDITIONAL
+                valid_virtual[parent_virtual-1].push_back(higher | lower);
                 domination_virtual[parent_virtual-1].push_back(domination_higher + (T(domination_status)<< i) + domination_lower);
                 c_virtual[parent_virtual-1].push_back(c_virtual[current_virtual-1][current_index]);
                 w_virtual[parent_virtual-1].push_back(w_virtual[current_virtual-1][current_index]);
@@ -399,82 +511,153 @@ void Smartstorage<T>::take_virtual_step_introduce(
 }
 
 template<typename T>
-void Smartstorage<T>::take_virtual_step_forget(const int current_virtual, vector<vector<int>>& c_virtual,vector<vector<int>>& p_virtual, 
+void Smartstorage<T>::take_virtual_step_forget(const int current_virtual, 
+    vector<vector<T>>& valid_virtual,
+    vector<vector<T>>& domination_virtual,
+    vector<vector<int>>& c_virtual,
+    vector<vector<int>>& w_virtual,
+    vector<vector<int>>& p_virtual, 
     const int i, 
-    const vector<int>& bag_virtual, vector<vector<T>>& valid_virtual)
+    const int forgotten_vertex,
+    const vector<int>& bag_virtual,
+    vector<int>& number_of_neighbours_forgotten_virtual,
+    vector<int>& number_of_neighbours_present_virtual)
 {
     int parent_virtual = (current_virtual%2) + 1;
 
     valid_virtual[parent_virtual-1].resize(0);
     domination_virtual[parent_virtual-1].resize(0);
     c_virtual[parent_virtual-1].resize(0);
+    w_virtual[parent_virtual-1].resize(0);
     if(track_solution)
     {
         p_virtual[parent_virtual-1].resize(0);
     }
+    //cout << "I'm forgetting " << forgotten_vertex <<endl;
+    number_of_neighbours_forgotten_virtual.erase(number_of_neighbours_forgotten_virtual.begin()+i);
+    number_of_neighbours_present_virtual.erase(number_of_neighbours_present_virtual.begin()+i);
 
-    vector<int> number_of_neighbours_forgotten;
-    vector<int> number_of_neighbours_present;
-
-    number_of_forgotten_neighbours.erase(number_of_neighbours_forgotten.begin()+i);
-    number_of_neighbours_present.erase(number_of_neighbours_present.begin()+i);
-
-    //For all neighbours of whatever that i-th vertex was, do sth
+    int k = 0;
+    for(int j = 0; j < bag_virtual.size(); j++)
+    {
+        while(k<G.N[forgotten_vertex-1].size() && G.N[forgotten_vertex-1][k] < bag_virtual[j])
+            k++;
+        if(k<G.N[forgotten_vertex-1].size() && G.N[forgotten_vertex-1][k] == bag_virtual[j])
+        {
+            number_of_neighbours_forgotten_virtual[j]++;
+            number_of_neighbours_present_virtual[j]--;
+        }
+    }
+    
+    //print_vector(number_of_neighbours_forgotten_virtual);
 
     T lowerbitmask = (T(1)<<i) - 1;
     // Do two walks through the vector simultaneously, similar as to a merge.
 
     size_t current_index_zero = 0;
+    while(current_index_zero<valid_virtual[current_virtual-1].size() && ((valid_virtual[current_virtual-1][current_index_zero] & (T(1)<<i)) != 0))
+        current_index_zero++;
     size_t current_index_one = 0;
+    while(current_index_one<valid_virtual[current_virtual-1].size() && ((valid_virtual[current_virtual-1][current_index_one] & (T(1)<<i)) == 0))
+        current_index_one++;
 
-    while(current_index_zero != valid_virtual[current_virtual-1].size() && current_index_one != valid_virtual[current_virtual-1].size())
+    while(current_index_zero < valid_virtual[current_virtual-1].size() && current_index_one < valid_virtual[current_virtual-1].size())
     {
-        while((valid_virtual[current_virtual-1][current_index_zero] & (T(1)<<i)) != 0)
-            current_index_zero++;
-        while((valid_virtual[current_virtual-1][current_index_one] & (T(1)<<i)) == 0)
-            current_index_one++;
-        if(valid_virtual[current_virtual-1][current_index_zero] <= valid_virtual)
-    }
-
-    for(size_t current_index = 0; current_index < valid_virtual[current_virtual-1].size(); current_index++)
-    {
-        if(! (valid_virtual[current_virtual-1][current_index] & (T(1)<<i)) )   //If bit at i = 0, 
+        T lower_zero = valid_virtual[current_virtual-1][current_index_zero] & lowerbitmask;
+        T higher_zero = (valid_virtual[current_virtual-1][current_index_zero] - lower_zero) >> 1;
+        T lower_one = valid_virtual[current_virtual-1][current_index_one] & lowerbitmask;
+        T higher_one = (valid_virtual[current_virtual-1][current_index_one] - lower_one - (T(1)<<i)) >> 1;
+        if(higher_zero <= higher_one && lower_zero <= lower_one)
         {
-            T lower = valid_virtual[current_virtual-1][current_index] & lowerbitmask;
-            T higher = (valid_virtual[current_virtual-1][current_index] - lower) >> 1;
-            
-            valid_virtual[parent_virtual-1].push_back(higher | lower);
-
-            c_virtual[parent_virtual-1].push_back(c_virtual[current_virtual-1][current_index]);
+            valid_virtual[parent_virtual-1].push_back(higher_zero + lower_zero);
             if(track_solution)
             {
-                p_virtual[parent_virtual-1].push_back(p_virtual[current_virtual-1][current_index]);    //P
+                p_virtual[parent_virtual-1].push_back(p_virtual[current_virtual-1][current_index_zero]);
             }
-        }
-    }
-    size_t parent_index = 0;
-    for(size_t current_index = 0; current_index < valid_virtual[current_virtual-1].size(); current_index++)
-    {
-        if(valid_virtual[current_virtual-1][current_index] & (T(1)<<i)) //If bit at i = 1
-        {
-            T lower = valid_virtual[parent_virtual-1][parent_index] & lowerbitmask;
-            T higher = (valid_virtual[parent_virtual-1][parent_index] - lower) << 1;
-            while(valid_virtual[current_virtual-1][current_index] != (higher | lower | (T(1) << i)))            //MAKE SURE TO SKIP SOME CURRENT_indices
+            T lower_zero_domination = domination_virtual[current_virtual-1][current_index_zero] & lowerbitmask;
+            bool lower_domination_status = ((domination_virtual[current_virtual-1][current_index_zero] & (T(1) << i)) != 0); 
+            T higher_zero_domination = (domination_virtual[current_virtual-1][current_index_zero] - lower_zero_domination - (T(lower_domination_status) << i)) >> 1;
+            domination_virtual[parent_virtual-1].push_back(higher_zero_domination + lower_zero_domination);
+            c_virtual[parent_virtual-1].push_back(c_virtual[current_virtual-1][current_index_zero]);
+            w_virtual[parent_virtual-1].push_back(w_virtual[current_virtual-1][current_index_zero]);
+            if(higher_zero == higher_one && lower_zero == lower_one)
             {
-                parent_index++;
-                lower = valid_virtual[parent_virtual-1][parent_index] & lowerbitmask;
-                higher = (valid_virtual[parent_virtual-1][parent_index] - lower) << 1;
-            }
-            if(c_virtual[current_virtual-1][current_index] > c_virtual[parent_virtual-1][parent_index])
-            {
-                c_virtual[parent_virtual-1][parent_index] = c_virtual[current_virtual-1][current_index];
-                if(track_solution)
+                if(c_virtual[current_virtual-1][current_index_one] > c_virtual[current_virtual-1][current_index_zero])
                 {
-                    p_virtual[parent_virtual-1][parent_index] = p_virtual[current_virtual-1][current_index];        //P
+                    T lower_one_domination = domination_virtual[current_virtual-1][current_index_one] & lowerbitmask;
+                    T higher_one_domination = (domination_virtual[current_virtual-1][current_index_one] - lower_one_domination - (T(1)<<i)) >> 1;
+                    valid_virtual[parent_virtual-1].back() = higher_one + lower_one;
+                    if(track_solution)
+                    {
+                        p_virtual[parent_virtual-1].back() = p_virtual[current_virtual-1][current_index_one];
+                    }
+                    domination_virtual[parent_virtual-1].back() = higher_one_domination + lower_one_domination;
+                    c_virtual[parent_virtual-1].back() = c_virtual[current_virtual-1][current_index_one];
+                    // w. Needn't update w
+                    current_index_one++;
+                    while(current_index_one<valid_virtual[current_virtual-1].size() && ((valid_virtual[current_virtual-1][current_index_one] & (T(1)<<i)) == 0))
+                        current_index_one++;
                 }
-            } 
-            parent_index++;
-        } 
+            }
+            current_index_zero++;
+            while(current_index_zero<valid_virtual[current_virtual-1].size() && ((valid_virtual[current_virtual-1][current_index_zero] & (T(1)<<i)) != 0))
+                current_index_zero++;
+        }
+        else
+        {
+            valid_virtual[parent_virtual-1].push_back(higher_one + lower_one);
+            if(track_solution)
+            {
+                p_virtual[parent_virtual-1].push_back(p_virtual[current_virtual-1][current_index_one]);
+            }
+            T lower_one_domination = domination_virtual[current_virtual-1][current_index_one] & lowerbitmask;
+            T higher_one_domination = (domination_virtual[current_virtual-1][current_index_one] - lower_one_domination - (T(1)<<i)) >> 1;
+            domination_virtual[parent_virtual-1].push_back(higher_one_domination + lower_one_domination);
+            c_virtual[parent_virtual-1].push_back(c_virtual[current_virtual-1][current_index_one]);
+            w_virtual[parent_virtual-1].push_back(w_virtual[current_virtual-1][current_index_one] - G.weights[forgotten_vertex-1]);
+            current_index_one++;
+            while(current_index_one<valid_virtual[current_virtual-1].size() && ((valid_virtual[current_virtual-1][current_index_one] & (T(1)<<i)) == 0))
+                current_index_one++;
+        }
+        
+    }
+    // Add remainder
+    while(current_index_zero < valid_virtual[current_virtual-1].size())
+    {
+        T lower_zero = valid_virtual[current_virtual-1][current_index_zero] & lowerbitmask;
+        T higher_zero = (valid_virtual[current_virtual-1][current_index_zero] - lower_zero) >> 1;
+        valid_virtual[parent_virtual-1].push_back(higher_zero + lower_zero);
+        if(track_solution)
+        {
+            p_virtual[parent_virtual-1].push_back(p_virtual[current_virtual-1][current_index_zero]);
+        }
+        T lower_zero_domination = domination_virtual[current_virtual-1][current_index_zero] & lowerbitmask;
+        bool lower_domination_status = ((domination_virtual[current_virtual-1][current_index_zero] & (T(1) << i)) != 0); 
+        T higher_zero_domination = (domination_virtual[current_virtual-1][current_index_zero] - lower_zero_domination - (T(lower_domination_status)<<i)) >> 1;
+        domination_virtual[parent_virtual-1].push_back(higher_zero_domination + lower_zero_domination);
+        c_virtual[parent_virtual-1].push_back(c_virtual[current_virtual-1][current_index_zero]);
+        w_virtual[parent_virtual-1].push_back(w_virtual[current_virtual-1][current_index_zero]);
+        current_index_zero++;
+        while(current_index_zero<valid_virtual[current_virtual-1].size() && ((valid_virtual[current_virtual-1][current_index_zero] & (T(1)<<i)) != 0))
+            current_index_zero++;
+    }
+    while(current_index_one < valid_virtual[current_virtual-1].size())
+    {
+        T lower_one = valid_virtual[current_virtual-1][current_index_one] & lowerbitmask;
+        T higher_one = (valid_virtual[current_virtual-1][current_index_one] - lower_one - (T(1)<<i)) >> 1;
+        valid_virtual[parent_virtual-1].push_back(higher_one + lower_one);
+        if(track_solution)
+        {
+            p_virtual[parent_virtual-1].push_back(p_virtual[current_virtual-1][current_index_one]);
+        }
+        T lower_one_domination = domination_virtual[current_virtual-1][current_index_one] & lowerbitmask;
+        T higher_one_domination = (domination_virtual[current_virtual-1][current_index_one] - lower_one_domination - (T(1)<<i)) >> 1;
+        domination_virtual[parent_virtual-1].push_back(higher_one_domination + lower_one_domination);
+        c_virtual[parent_virtual-1].push_back(c_virtual[current_virtual-1][current_index_one]);
+        w_virtual[parent_virtual-1].push_back(w_virtual[current_virtual-1][current_index_one] - G.weights[forgotten_vertex-1]);
+        current_index_one++;
+        while(current_index_one<valid_virtual[current_virtual-1].size() && ((valid_virtual[current_virtual-1][current_index_one] & (T(1)<<i)) == 0))
+            current_index_one++;
     }
 }
 
@@ -493,13 +676,19 @@ void Smartstorage<T>::initialize_leaf(const int current, const RootedTree& RT)
     int current_virtual = 1;
     int parent_virtual = 2;
 
+    vector<vector<T>> valid_virtual(2);
+    vector<vector<T>> domination_virtual(2);
 
     vector<vector<int>> c_virtual(2);
+    vector<vector<int>> w_virtual(2);
     vector<vector<int>> p_virtual(2);       //P
-    vector<vector<T>> valid_virtual(2);
+
     {///////////////////////////////////////////////////////////////// begin_virtual_path Leaf version
     valid_virtual[current_virtual-1] = vector<T>(1,T(0));
+    domination_virtual[current_virtual-1] = vector<T>(1,T(0));
+
     c_virtual[current_virtual-1] = vector<int>(1,0);
+    w_virtual[current_virtual-1] = vector<int>(1,0);
     if(track_solution)
     {
         p_virtual[current_virtual-1] = vector<int>(1,0);  //P
@@ -507,7 +696,8 @@ void Smartstorage<T>::initialize_leaf(const int current, const RootedTree& RT)
     }
     }/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     vector<int> bag_virtual = source_bag;
-
+    vector<int> number_of_neighbours_forgotten_virtual = vector<int>();
+    vector<int> number_of_neighbours_present_virtual = vector<int>();
     vector<int> intersection_bag;
     set_intersection(source_bag.begin(), source_bag.end(),target_bag.begin(), target_bag.end(),back_inserter(intersection_bag));
 
@@ -542,7 +732,17 @@ void Smartstorage<T>::initialize_leaf(const int current, const RootedTree& RT)
 
                     int i = it_intersection_bag-intersection_bag.begin()+introduced_so_far;
 
-                    take_virtual_step_introduce(current_virtual, c_virtual, p_virtual, i, bag_virtual,valid_virtual);
+                    take_virtual_step_introduce(current_virtual,
+                        valid_virtual,
+                        domination_virtual,
+                        c_virtual, 
+                        w_virtual,
+                        p_virtual, 
+                        i, 
+                        bag_virtual,
+                        number_of_neighbours_forgotten_virtual,
+                        number_of_neighbours_present_virtual
+                    );
                     swap(current_virtual,parent_virtual);
                 }//END INTRODUCE BLOCK
                 introduced_so_far++;
@@ -550,6 +750,8 @@ void Smartstorage<T>::initialize_leaf(const int current, const RootedTree& RT)
 
             }
         }
+        print_vector(bag_virtual);
+        cout << endl;
     }
     while(it_target_bag != target_bag.end())        //introduce what's left
     {
@@ -560,7 +762,17 @@ void Smartstorage<T>::initialize_leaf(const int current, const RootedTree& RT)
 
             int i = it_intersection_bag-intersection_bag.begin()+introduced_so_far;     //Relevant bitposition
 
-            take_virtual_step_introduce(current_virtual, c_virtual, p_virtual, i, bag_virtual,valid_virtual);
+            take_virtual_step_introduce(current_virtual, 
+                valid_virtual,
+                domination_virtual,
+                c_virtual, 
+                w_virtual,
+                p_virtual, 
+                i, 
+                bag_virtual,
+                number_of_neighbours_forgotten_virtual,
+                number_of_neighbours_present_virtual
+            );
             swap(current_virtual, parent_virtual);
 
         }//END INTRODUCE BLOCK
@@ -569,7 +781,12 @@ void Smartstorage<T>::initialize_leaf(const int current, const RootedTree& RT)
     }
 
     validcandidates[parent-1] = move(valid_virtual[current_virtual-1]);
+    domination[parent-1] = move(domination_virtual[current_virtual-1]);
     c[parent-1] = move(c_virtual[current_virtual-1]);
+    w[parent-1] = move(w_virtual[current_virtual-1]);
+
+    number_of_neighbours_forgotten[parent-1] = move(number_of_neighbours_forgotten_virtual);
+    number_of_neighbours_present[parent-1] = move(number_of_neighbours_present_virtual);
     /*
     if(track_solution)
     {
@@ -645,12 +862,20 @@ void Smartstorage<T>::end_virtual_path(const int current, const RootedTree& RT,
 
 template<typename T>
 void Smartstorage<T>::begin_virtual_path(const int current, const RootedTree& RT,
-        vector<int>& c_virtual, vector<int>& p_virtual, vector<T>& valid_virtual)
+    vector<T>& valid_virtual,
+    vector<T>& domination_virtual,
+    vector<int>& c_virtual,
+    vector<int>& w_virtual, 
+    vector<int>& p_virtual)
 {
-    valid_virtual = move(validcandidates[current-1]);   //
-    validcandidates[current-1] = vector<T>();
+    valid_virtual = move(validcandidates[current-1]);
+    validcandidates[current-1] = vector<T>();   // Free space just in case
+    domination_virtual = move(domination[current-1]);
+    domination[current-1] = vector<T>();        // Free space just in case
     c_virtual = move(c[current-1]);  
-    c[current-1] = vector<int>();               
+    c[current-1] = vector<int>();               // Free space just in case               
+    w_virtual = move(w[current-1]);
+    w[current-1] = vector<int>();
     if(track_solution)
     {
         p_virtual = vector<int>(c_virtual.size(),0);  //P
@@ -660,7 +885,14 @@ void Smartstorage<T>::begin_virtual_path(const int current, const RootedTree& RT
 
 template<typename T>
 void Smartstorage<T>::end_virtual_path_no_files(const int current, const RootedTree& RT,
-    vector<int>& c_virtual, vector<int>& p_virtual, vector<T>& valid_virtual)
+    vector<T>& valid_virtual,
+    vector<T>& domination_virtual,
+    vector<int>& c_virtual, 
+    vector<int>& w_virtual,
+    vector<int>& p_virtual,
+    vector<int>& number_of_neighbours_forgotten_virtual,
+    vector<int>& number_of_neighbours_present_virtual
+)
 {
     int parent = RT.parents[current-1];
     int neighbourposition = RT.neighbourIterators[parent-1] - RT.N[parent-1].begin();
@@ -674,8 +906,13 @@ void Smartstorage<T>::end_virtual_path_no_files(const int current, const RootedT
                 (RT.neighbourIterators[parent-1] - RT.N[parent-1].begin() == 1 && *RT.N[parent-1].begin() == RT.parents[parent-1])))
     )
     {
+        number_of_neighbours_forgotten[parent-1] = move(number_of_neighbours_forgotten_virtual);
+        number_of_neighbours_present[parent-1] = move(number_of_neighbours_present_virtual);
+
         validcandidates[parent-1] = move(valid_virtual);
+        domination[parent-1] = move(domination_virtual);
         c[parent-1] = move(c_virtual);
+        w[parent-1] = move(w_virtual);
         if(track_solution)
         {
             p[parent-1][neighbourposition] = move(p_virtual);
@@ -686,6 +923,56 @@ void Smartstorage<T>::end_virtual_path_no_files(const int current, const RootedT
     //Information on parent already exists
     else
     {
+        // 
+        T all_neighbours_accounted_for_mask = 0;
+
+        for(size_t j = 0; j < bags[parent-1].size(); j++)
+        {
+            number_of_neighbours_forgotten[parent-1][j] += number_of_neighbours_forgotten_virtual[j];
+            if(number_of_neighbours_forgotten[parent-1][j] + number_of_neighbours_present[parent-1][j] == G.N[bags[parent-1][j]-1].size())
+                all_neighbours_accounted_for_mask |= (T(1) << j); 
+        }
+
+        // Start doing: if intersecting, keep if all all_neighbours_accounted_for_mask are also dominated
+        vector<T> valid_temporary;
+        vector<T> domination_temporary;
+        vector<int> c_temporary;
+        vector<int> w_temporary;
+        vector<int> p_temporary;
+
+        size_t index_right = 0;
+        for(size_t index_left = 0; index_left < validcandidates[parent-1].size(); index_left++)
+        {
+            while(index_right < valid_virtual.size() && valid_virtual[index_right] < validcandidates[parent-1][index_left])
+                index_right++;
+            if(index_right < valid_virtual.size() && valid_virtual[index_right] == validcandidates[parent-1][index_left])
+            {
+                // consider adding
+                if(((domination[parent-1][index_left] | domination_virtual[index_right]) & all_neighbours_accounted_for_mask) == all_neighbours_accounted_for_mask)
+                {
+                    valid_temporary.push_back(validcandidates[parent-1][index_left]);
+                    domination_temporary.push_back(domination[parent-1][index_left] | domination_virtual[index_right]);
+                    c_temporary.push_back(c[parent-1][index_left] + c_virtual[index_right]);
+                    w_temporary.push_back(w[parent-1][index_left]);
+                    
+                    if(track_solution)
+                    {
+                        // p
+                    }
+                }
+            }
+        }
+        validcandidates[parent-1] = move(valid_temporary);
+        domination[parent-1] = move(domination_temporary);
+        c[parent-1] = move(c_temporary);
+        w[parent-1] = move(w_temporary);
+        
+        if(track_solution)
+        {
+            // P; P is an issue
+        }
+
+        /*
         for(size_t index = 0; index < c[parent-1].size(); index++)
         {
             c[parent-1][index] += c_virtual[index];
@@ -696,5 +983,6 @@ void Smartstorage<T>::end_virtual_path_no_files(const int current, const RootedT
             compress_p_to_file(parent,neighbourposition,p[parent-1][neighbourposition]);
             p[parent-1][neighbourposition] = vector<int>();
         }
+        */
     }
 }

@@ -4,7 +4,7 @@ BUILD_DIR = ../../build
 
 # Compiler and flags
 CXX = g++
-CXXFLAGS = -Wall -std=c++20 -O3 -march=native -I$(SRC_DIR)  # Add src directory for headers
+CXXFLAGS = -Wall -Wextra -Wpedantic -std=c++20 -g -O0 -I$(SRC_DIR)  # Add src directory for headers
 
 # Linker flags (Optional for additional linker settings, currently empty)
 LDFLAGS =  # No special linker flags for this project

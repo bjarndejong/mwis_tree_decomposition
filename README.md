@@ -2,55 +2,40 @@
 
 ## Command-Line Usage
 
-```bash
+```
 mwis_smart --help
-mwis_smart [options] <.td file> <.graph file>
+mwis_smart [options] <tree_decomposition.td> <graph.graph>
 ```
 
 ### Arguments
 
 | Argument                  | Description                                               | Required |
 |---------------------------|-----------------------------------------------------------|----------|
-| `<.td file>`              | Path to input tree decomposition file                     |   yes    |
-| `<.graph file>`           | Path to input graph file                                  |   yes    |
-
-### File Formats
-
-
-- **`.graph` file (Input Graph):**  
-  The file format is as follows:  
-  - The first line contains three integers: `n m 10`  
-    - `n` = number of vertices  
-    - `m` = number of edges  
-    - The constant `10` (format identifier)  
-  - Vertices are numbered consecutively from 1 to `n`
-  - Each of the following `n` lines describes a vertex:  
-    - The line contains the vertex weight `w(v)` followed by the vertex’s neighbors `N(v)`  
-    - Example: `7 9 10` means vertex weight 7, neighbors vertices 9 and 10  
-
-- **`.td` file (Input Tree Decomposition):**  
-  Must follow the PACE 2017 format and be sorted as follows:  
-  - Bags sorted ascending by their IDs  
-  - Each bag’s contents sorted in ascending  
-  - Edges between bags listed as pairs of bag IDs separated by space, e.g., `u v` with `u < v`  
-  - The list of edges sorted lexicographically, i.e., `u v < i j` if `u < i`, or if `u = i` then `v < j`  
-  Unsorted `.td` files may cause incorrect behavior. Preprocessing to ensure sorted order is recommended.
-
+| `<tree_decomposition.td>`              | Path to the input tree decomposition file (.td). See [`.td` file](#td-file) below.                    |   Yes    |
+| `<graph.graph>`           | Path to the input graph file (.graph). See [`.graph` file](#graph-file) below.                                 |   Yes    |
 
 ### Options
 
 | Option                      | Description                                                                                 | Default |
 |-----------------------------|---------------------------------------------------------------------------------------------|---------|
-| `--track_solution=true\|false` | Track and extract the MWIS solution.                                                     | false   |
-| `--store_c=true\|false`        | Store intermediate data compressed to reduce memory usage.                               | false   |
+| `--track_solution=<true\|false>` | Track and extract the MWIS solution.                                                     | false   |
+| `--store_c=<true\|false>`        | Store intermediate data compressed to reduce memory usage.                               | false   |
 
-### Example
+### Output
+
+The program writes the weight of a maximum weight independent set (MWIS) to standard output:
+- Line 1: `<mwis_value>` — the total weight of a MWIS
+- Line 2: `<computation_time>` — the time in seconds it took to compute the weight
+- Line 3 (optional): If `--track_solution=true` is set, a vertex set is printed in the format:  
+  `<mwis>` — a space-separated list of vertex IDs in ascending order
+
+### Example usage
 
 The `.graph` file and `.td` file from this example, together with visualizations (`.png`) of both files, are located in `data/test_set/`.
 
 Running
 
-```bash
+```
 ./build/mwis_smart data/test_set/mytest.graph data/test_set/mytest.td --track_solution=true
 ```
 from the root directory of the repository would result in
@@ -58,5 +43,33 @@ from the root directory of the repository would result in
 ```
 25
 0.00047671
-1 3 4 
+1 3 4
 ```
+
+## File Formats
+
+### `.graph` file
+An undirected vertex weighted graph following the METIS format:
+- The first line contains three integers: `<number_of_vertices> <number_of_edges> 10`, where   
+    - the constant `10` indicates use of vertex weights but not edge weights.
+- Vertices are numbered consecutively from `1` to `<number_of_vertices>`.
+- Each of the following `<number_of_vertices>` lines describes a vertex `v` by `<weight> <neighbour_1> <neighbour_2> ...` :  
+    - Here, `<weight>` is the integer weight of vertex `v`, followed by a space-separated list of its neighbours in ascending order.
+
+### `.td` file
+The tree decomposition must follow the PACE 2017 format with additional ordering and sorting requirements as specified below:
+- **Line types**:
+    - `c` — *comment lines*, e.g., `c <text>`
+    - `s` — *solution line*, first non-comment line, format:  
+    `s td <number_of_bags> <max_bag_size> <number_of_vertices>`
+    - `b` — *bag lines*, format:  
+    `b <bag_ID> <bag_contents>`
+    - *Tree edge lines*, format:  
+    `<bag_ID_1> <bag_ID_2>`, where `<bag_ID_1> < <bag_ID_2>`
+- **General constraints**:
+    - Bag IDs are continuous integers from `1` to `<number_of_bags>`.
+    - The solution line (`s`) must be the first non-comment line; bag lines (`b`) must appear after the solution line and before the tree edge lines.
+- **Additional constraints**:
+    - Comment lines (`c`) appear only at the beginning of the file.
+    - Bag lines must be sorted by bag ID in ascending order.
+    - Bag contents within each bag line must be sorted in ascending order.

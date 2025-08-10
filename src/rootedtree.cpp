@@ -2,15 +2,40 @@
 
 #include <vector>
 
+#include "general.h"
+
 using namespace std;
 
 //Order of initialization list relevant, therefore odd naming, something about -Wreorder
-RootedTree::RootedTree(const vector<vector<int>>& ADJ, int root) : N(ADJ), root(root), number_of_nodes(ADJ.size())
+// Move constructor
+RootedTree::RootedTree(vector<vector<int>>&& ADJ, int root) : N(move(ADJ)), root(root)
 {
-                                                                                    //setup(*this);
+    initialize();
+}
+
+// Copy constructor
+RootedTree::RootedTree(const vector<vector<int>>& ADJ, int root) : N(ADJ), root(root)
+{
+    initialize();
+}
+
+// Copy-assign constructor
+RootedTree::RootedTree(const RootedTree& other)
+    : N(other.N),
+      parents(other.parents),
+      root(other.root)
+{
+    neighbourIterators.resize(N.size());
+    for (size_t i = 0; i < N.size(); ++i)
+        neighbourIterators[i] = N[i].begin();
+}
+
+void RootedTree::initialize()
+{
+    size_t number_of_nodes = N.size();                                                                          //setup(*this);
     parents.resize(number_of_nodes);
     neighbourIterators.resize(number_of_nodes);
-    for(int index = 0; index<number_of_nodes; index++)
+    for(size_t index = 0; index<number_of_nodes; index++)
         neighbourIterators[index] = N[index].begin();
 
     //Initialize
@@ -43,28 +68,9 @@ RootedTree::RootedTree(const vector<vector<int>>& ADJ, int root) : N(ADJ), root(
             parent = parents[current-1];
         }
     }
-    for(int i = 0; i<number_of_nodes; i++)                                              //cleanup(*this);
+    for(size_t i = 0; i<number_of_nodes; i++)                                              //cleanup(*this);
         neighbourIterators[i] = N[i].begin();
 }
-
-void RootedTree::reroot(const int newroot)
-{
-    int current = newroot;
-    int parent = parents[current - 1];
-    int grandparent;
-
-    while(current != root)
-    {
-        grandparent = parents[parent-1];
-        parents[parent-1] = current;
-        current = parent;
-        parent = grandparent;
-    }
-    parents[newroot-1] = newroot;
-
-    root = newroot;
-}
-
 
 /*
 void RootedTree::df_traversal(function<void(const RootedTree&)> setup,function<void(const int, const RootedTree&)> discover,function<void(const int, const RootedTree&)> finish,function<void(const RootedTree&)> cleanup)
@@ -112,3 +118,27 @@ void RootedTree::df_traversal(function<void(const RootedTree&)> setup,function<v
         neighbourIterators[i] = N[i].begin();
 }
 */
+
+void RootedTree::reroot(const int newroot)
+{
+    int current = newroot;
+    int parent = parents[current - 1];
+    int grandparent;
+
+    while(current != root)
+    {
+        grandparent = parents[parent-1];
+        parents[parent-1] = current;
+        current = parent;
+        parent = grandparent;
+    }
+    parents[newroot-1] = newroot;
+
+    root = newroot;
+}
+
+void RootedTree::print() const
+{
+    for(int i = 0; i<N.size(); i++)
+        print_vector(N[i]);
+}

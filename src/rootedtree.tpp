@@ -37,6 +37,7 @@ void RootedTree::df_traversal(SetupFunction setup, DiscoverFunction discover, Fi
         else
         {
             finish(current,*this);
+            neighbourIterators[current-1] = N[current-1].begin();
             neighbourIterators[parent-1]++;
             current = parent;
             parent = parents[current-1];
@@ -45,7 +46,8 @@ void RootedTree::df_traversal(SetupFunction setup, DiscoverFunction discover, Fi
 
     //Finish the root or whatever that means
     finish(current,*this);  //
+    neighbourIterators[current-1] = N[current-1].begin();
     cleanup(*this);
-    for(size_t i = 0; i<N.size(); i++)          //RESET state of RootedTree,
-        neighbourIterators[i] = N[i].begin();
+    //for(size_t i = 0; i<N.size(); i++)          //RESET state of RootedTree,
+    //    neighbourIterators[i] = N[i].begin();
 }

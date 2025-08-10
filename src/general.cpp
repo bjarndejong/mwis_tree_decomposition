@@ -44,6 +44,13 @@ void print_vector(const vector<unsigned int>& v)
     cout << endl;
 }
 
+void print_vector(const vector<unsigned long long>& v)
+{
+    for(vector<unsigned long long>::const_iterator it = v.begin(); it != v.end(); it++)
+        cout << *it << ' ';
+    cout << endl;
+}
+
 int countr_zero(__uint128_t x) {
     if (x == 0) return 128;
 

@@ -11,6 +11,8 @@ void print_vector(const std::vector<int>& v);
 
 void print_vector(const std::vector<unsigned int>& v);
 
+void print_vector(const std::vector<unsigned long long>& v);
+
 
 int countr_zero(__uint128_t x);
 
