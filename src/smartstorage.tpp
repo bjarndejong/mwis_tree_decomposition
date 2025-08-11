@@ -104,7 +104,7 @@ void Smartstorage<T>::cleanup(const RootedTree& RT)
 {
     int current = RT.root;
     cout << *max_element(c[current-1].begin(), c[current-1].end()) << endl;
-    cout << max_element(c[current-1].begin(), c[current-1].end())-c[current-1].begin() << endl;
+    //cout << max_element(c[current-1].begin(), c[current-1].end())-c[current-1].begin() << endl;
 }
 
 template<typename T>
@@ -470,7 +470,7 @@ void Smartstorage<T>::take_virtual_step_introduce(
         }
         current_index_one++;
     }
-
+    //cout << log2(valid_virtual[parent_virtual-1].size()) << endl;
     /*
     for(size_t current_index = 0; current_index < valid_virtual[current_virtual-1].size();)
     {
@@ -700,6 +700,8 @@ void Smartstorage<T>::take_virtual_step_forget(const int current_virtual,
         while(current_index_one<valid_virtual[current_virtual-1].size() && ((valid_virtual[current_virtual-1][current_index_one] & (T(1)<<i)) == 0))
             current_index_one++;
     }
+
+    //cout << log2(valid_virtual[parent_virtual-1].size()) << endl;
 }
 
 
