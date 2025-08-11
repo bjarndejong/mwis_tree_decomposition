@@ -62,10 +62,8 @@ int main(int argc, char* argv[])
 
     const int start = 1;
     RootedTree RT(move(TD.N),start);
-
-    cout << RT.N[start-1].size() << endl;
     
-    Smartstorage<unsigned long long> S(G,TD.bags,store_c,track_solution);
+    Smartstorage<__uint128_t> S(G,TD.bags,store_c,track_solution);
 
     // Create a stringstream to capture std::cout output
     // Store the original cout buffer to restore later
@@ -76,10 +74,10 @@ int main(int argc, char* argv[])
 
     auto timestamp1 = chrono::high_resolution_clock::now();
     RT.df_traversal(
-        bind(&Smartstorage<unsigned long long>::setup, &S, placeholders::_1),
-        bind(&Smartstorage<unsigned long long>::discover, &S, placeholders::_1, placeholders::_2),
-        bind(&Smartstorage<unsigned long long>::finish, &S, placeholders::_1, placeholders::_2),  //[](const int&,const RootedTree&){} -- lambda dummy
-        bind(&Smartstorage<unsigned long long>::cleanup, &S, placeholders::_1)
+        bind(&Smartstorage<__uint128_t>::setup, &S, placeholders::_1),
+        bind(&Smartstorage<__uint128_t>::discover, &S, placeholders::_1, placeholders::_2),
+        bind(&Smartstorage<__uint128_t>::finish, &S, placeholders::_1, placeholders::_2),  //[](const int&,const RootedTree&){} -- lambda dummy
+        bind(&Smartstorage<__uint128_t>::cleanup, &S, placeholders::_1)
     );
     auto timestamp2 = chrono::high_resolution_clock::now();
     //Restore cout

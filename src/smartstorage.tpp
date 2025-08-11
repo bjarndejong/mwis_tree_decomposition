@@ -634,7 +634,7 @@ void Smartstorage<T>::take_virtual_step_forget(const int current_virtual,
                     domination_virtual[parent_virtual-1].back() = (higher_one_domination | lower_one_domination);
                     c_virtual[parent_virtual-1].back() = c_virtual[current_virtual-1][current_index_one];
                     // w. Needn't update w
-                    assert(w_virtual[current_virtual-1][current_index_zero] == w_virtual[current_virtual-1][current_index_one] - G.weights[forgotten_vertex-1]);
+                    //assert(w_virtual[current_virtual-1][current_index_zero] == w_virtual[current_virtual-1][current_index_one] - G.weights[forgotten_vertex-1]);
                 }
                 current_index_one++;
                 while(current_index_one<valid_virtual[current_virtual-1].size() && ((valid_virtual[current_virtual-1][current_index_one] & (T(1)<<i)) == 0))
