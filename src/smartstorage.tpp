@@ -76,23 +76,26 @@ void Smartstorage<T>::finish(const int current, const RootedTree& RT)
     }
 
     update_current(current, RT);
-    //cout << "After updating " << current << endl;
-    //cout << "Bag:" << endl;
-    //print_vector(bags[current-1]);
-    //cout << "Forgotten:" << endl;
-    //print_vector(number_of_neighbours_forgotten[current-1]);
-    //cout << "Present:" << endl;
-    //print_vector(number_of_neighbours_present[current-1]);
-    //cout << "Valid:" << endl;
-    //print_vector(validcandidates[current-1]);
-    //cout << "Domination:" << endl;
-    //print_vector(domination[current-1]);
-    //cout << "c:" << endl;
-    //print_vector(c[current-1]);
-    //cout << "w:" << endl;
-    //print_vector(w[current-1]);
+    /*
+    cout << "At node " << current << endl;
+    cout << "Bag:" << endl;
+    print_vector(bags[current-1]);
+    cout << "Forgotten:" << endl;
+    print_vector(number_of_neighbours_forgotten[current-1]);
+    cout << "Present:" << endl;
+    print_vector(number_of_neighbours_present[current-1]);
+    cout << "Valid:" << endl;
+    print_vector(validcandidates[current-1]);
+    cout << "Domination:" << endl;
+    print_vector(domination[current-1]);
+    cout << "c:" << endl;
+    print_vector(c[current-1]);
+    cout << "w:" << endl;
+    print_vector(w[current-1]);
+    */
+    cout << log2(validcandidates[current-1].size()) << endl;
     //cout << endl;
-    
+    // */
     if(current != RT.root)
     {
         update_to_parent(current, RT);
@@ -103,7 +106,7 @@ template<typename T>
 void Smartstorage<T>::cleanup(const RootedTree& RT)
 {
     int current = RT.root;
-    cout << *max_element(c[current-1].begin(), c[current-1].end()) << endl;
+    //cout << *max_element(c[current-1].begin(), c[current-1].end()) << endl;
     //cout << max_element(c[current-1].begin(), c[current-1].end())-c[current-1].begin() << endl;
 }
 
@@ -198,23 +201,26 @@ void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)
                         number_of_neighbours_forgotten_virtual, 
                         number_of_neighbours_present_virtual);
                     swap(current_virtual, parent_virtual);
-
-                    //cout << "After forgetting " << *it_source_bag << endl;
-                    //cout << "Bag:" << endl;
-                    //print_vector(bag_virtual);
-                    //cout << "Forgotten:" << endl;
-                    //print_vector(number_of_neighbours_forgotten_virtual);
-                    //cout << "Present:" << endl;
-                    //print_vector(number_of_neighbours_present_virtual);
-                    //cout << "Valid:" << endl;
-                    //print_vector(valid_virtual[current_virtual-1]);
-                    //cout << "Domination:" << endl;
-                    //print_vector(domination_virtual[current_virtual-1]);
-                    //cout << "c:" << endl;
-                    //print_vector(c_virtual[current_virtual-1]);
-                    //cout << "w:" << endl;
-                    //print_vector(w_virtual[current_virtual-1]);
+                    /*
+                    cout << "After forgetting " << *it_source_bag << endl;
+                    cout << "Bag:" << endl;
+                    print_vector(bag_virtual);
+                    cout << "Forgotten:" << endl;
+                    print_vector(number_of_neighbours_forgotten_virtual);
+                    cout << "Present:" << endl;
+                    print_vector(number_of_neighbours_present_virtual);
+                    cout << "Valid:" << endl;
+                    print_vector(valid_virtual[current_virtual-1]);
+                    cout << "Domination:" << endl;
+                    print_vector(domination_virtual[current_virtual-1]);
+                    cout << "c:" << endl;
+                    print_vector(c_virtual[current_virtual-1]);
+                    cout << "w:" << endl;
+                    print_vector(w_virtual[current_virtual-1]);
+                    */
+                    cout << log2(valid_virtual[current_virtual-1].size()) << endl;
                     //cout << endl;
+                    // */
                 }//END FORGET BLOCK
                 //cout << bag_virtual.size() << " " << log2(valid_virtual[current_virtual-1].size()) << endl;
                 forgotten_so_far++;
@@ -241,9 +247,27 @@ void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)
                 *it_source_bag,
                 bag_virtual,
                 number_of_neighbours_forgotten_virtual,
-                number_of_neighbours_present_virtual
-            );
+                number_of_neighbours_present_virtual);
             swap(current_virtual, parent_virtual);
+            /*
+            cout << "After forgetting " << *it_source_bag << endl;
+            cout << "Bag:" << endl;
+            print_vector(bag_virtual);
+            cout << "Forgotten:" << endl;
+            print_vector(number_of_neighbours_forgotten_virtual);
+            cout << "Present:" << endl;
+            print_vector(number_of_neighbours_present_virtual);
+            cout << "Valid:" << endl;
+            print_vector(valid_virtual[current_virtual-1]);
+            cout << "Domination:" << endl;
+            print_vector(domination_virtual[current_virtual-1]);
+            cout << "c:" << endl;
+            print_vector(c_virtual[current_virtual-1]);
+            cout << "w:" << endl;
+            print_vector(w_virtual[current_virtual-1]);
+            */
+            cout << log2(valid_virtual[current_virtual-1].size()) << endl;
+            //cout << endl;
         }//END FORGET BLOCK
         forgotten_so_far++;
         it_source_bag++;
@@ -286,9 +310,27 @@ void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)
                         i, 
                         bag_virtual, 
                         number_of_neighbours_forgotten_virtual,
-                        number_of_neighbours_present_virtual
-                    );
+                        number_of_neighbours_present_virtual);
                     swap(current_virtual,parent_virtual);
+                    /*
+                    cout << "After introducing " << *it_target_bag << endl;
+                    cout << "Bag:" << endl;
+                    print_vector(bag_virtual);
+                    cout << "Forgotten:" << endl;
+                    print_vector(number_of_neighbours_forgotten_virtual);
+                    cout << "Present:" << endl;
+                    print_vector(number_of_neighbours_present_virtual);
+                    cout << "Valid:" << endl;
+                    print_vector(valid_virtual[current_virtual-1]);
+                    cout << "Domination:" << endl;
+                    print_vector(domination_virtual[current_virtual-1]);
+                    cout << "c:" << endl;
+                    print_vector(c_virtual[current_virtual-1]);
+                    cout << "w:" << endl;
+                    print_vector(w_virtual[current_virtual-1]);
+                    */
+                    cout << log2(valid_virtual[current_virtual-1].size()) << endl;
+                    //cout << endl;
                 }//END INTRODUCE BLOCK
                 introduced_so_far++;
                 it_target_bag++;
@@ -314,9 +356,28 @@ void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)
                 i, 
                 bag_virtual,
                 number_of_neighbours_forgotten_virtual,
-                number_of_neighbours_present_virtual 
-            );
+                number_of_neighbours_present_virtual);
             swap(current_virtual, parent_virtual);
+            /*
+            cout << "After introducing " << *it_target_bag << endl;
+            cout << "Bag:" << endl;
+            print_vector(bag_virtual);
+            cout << "Forgotten:" << endl;
+            print_vector(number_of_neighbours_forgotten_virtual);
+            cout << "Present:" << endl;
+            print_vector(number_of_neighbours_present_virtual);
+            cout << "Valid:" << endl;
+            print_vector(valid_virtual[current_virtual-1]);
+            cout << "Domination:" << endl;
+            print_vector(domination_virtual[current_virtual-1]);
+            cout << "c:" << endl;
+            print_vector(c_virtual[current_virtual-1]);
+            cout << "w:" << endl;
+            print_vector(w_virtual[current_virtual-1]);
+            */
+            cout << log2(valid_virtual[current_virtual-1].size()) << endl;
+            //cout << endl;
+            
 
         }//END INTRODUCE BLOCK
         introduced_so_far++;
