@@ -60,9 +60,10 @@ int main(int argc, char* argv[])
     TreeDecomp TD = TreeDecomp::from_file(filename_td);
     Graph G = Graph::from_file(filename_graph);
 
-
     const int start = 1;
     RootedTree RT(move(TD.N),start);
+
+    cout << RT.N[start-1].size() << endl;
     
     Smartstorage<unsigned long long> S(G,TD.bags,store_c,track_solution);
 

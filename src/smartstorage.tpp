@@ -75,22 +75,22 @@ void Smartstorage<T>::finish(const int current, const RootedTree& RT)
     }
 
     update_current(current, RT);
-    cout << "After updating " << current << endl;
-    cout << "Bag:" << endl;
-    print_vector(bags[current-1]);
-    cout << "Forgotten:" << endl;
-    print_vector(number_of_neighbours_forgotten[current-1]);
-    cout << "Present:" << endl;
-    print_vector(number_of_neighbours_present[current-1]);
-    cout << "Valid:" << endl;
-    print_vector(validcandidates[current-1]);
-    cout << "Domination:" << endl;
-    print_vector(domination[current-1]);
-    cout << "c:" << endl;
-    print_vector(c[current-1]);
-    cout << "w:" << endl;
-    print_vector(w[current-1]);
-    cout << endl;
+    //cout << "After updating " << current << endl;
+    //cout << "Bag:" << endl;
+    //print_vector(bags[current-1]);
+    //cout << "Forgotten:" << endl;
+    //print_vector(number_of_neighbours_forgotten[current-1]);
+    //cout << "Present:" << endl;
+    //print_vector(number_of_neighbours_present[current-1]);
+    //cout << "Valid:" << endl;
+    //print_vector(validcandidates[current-1]);
+    //cout << "Domination:" << endl;
+    //print_vector(domination[current-1]);
+    //cout << "c:" << endl;
+    //print_vector(c[current-1]);
+    //cout << "w:" << endl;
+    //print_vector(w[current-1]);
+    //cout << endl;
     
     if(current != RT.root)
     {
@@ -111,47 +111,6 @@ void Smartstorage<T>::update_current(const int current, const RootedTree& RT)
 {
     if((RT.N[current-1].size()>2 && current != RT.root) || (current == RT.root && RT.N[current-1].size()>1))
     {
-        /*
-        //vector<int> w(validcandidates[current-1].size());
-        //w[0] = 0;
-        //for(size_t index = 1; index<validcandidates[current-1].size(); index++)
-        //{
-        //    int j = countr_zero(validcandidates[current-1][index]);
-        //    auto it = lower_bound(validcandidates[current-1].begin(), validcandidates[current-1].begin() + index - 1, validcandidates[current-1][index] - (T(1)<<j));
-        //    w[index] = w[it-validcandidates[current-1].begin()] + G.weights[bags[current-1][j]-1];
-        //}
-        
-        vector<T> adjacency_masks(bags[current-1].size(),T(0));
-        for(int i = 0; i< bags[current-1].size(); i++)
-        {
-            int k = 0;
-            for(int j = 0; j<i; j++)
-            {
-                while(k < G.N[bags[current-1][i]-1].size() && G.N[bags[current-1][i]-1][k] < bags[current-1][j])
-                    k++;
-                if(k < G.N[bags[current-1][i]-1].size() && G.N[bags[current-1][i]-1][k] == bags[current-1][j])
-                {
-                    adjacency_masks[i] |= (T(1) << j);
-                }
-            }
-        }
-
-        //Set up validcandidates for current bag
-        vector<T> validcandidates(1,0);
-        vector<int> w(1,0);
-        for(int i = 0; i<bags[current-1].size(); i++)
-        {
-            int vSize = validcandidates.size();
-            for(int index = 0; index<vSize; index++)
-            {
-                if((adjacency_masks[i] & validcandidates[index]) == 0)
-                {
-                    validcandidates.push_back(validcandidates[index] | (T(1)<<i));
-                    w.push_back(w[index]+G.weights[bags[current-1][i]-1]);
-                }
-            }
-        }
-            */
         for(size_t index = 0; index < c[current-1].size(); index++)
             c[current-1][index] -= w[current-1][index]*(RT.N[current-1].size()-2 + (current==RT.root));
     }
@@ -239,22 +198,22 @@ void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)
                         number_of_neighbours_present_virtual);
                     swap(current_virtual, parent_virtual);
 
-                    cout << "After forgetting " << *it_source_bag << endl;
-                    cout << "Bag:" << endl;
-                    print_vector(bag_virtual);
-                    cout << "Forgotten:" << endl;
-                    print_vector(number_of_neighbours_forgotten_virtual);
-                    cout << "Present:" << endl;
-                    print_vector(number_of_neighbours_present_virtual);
-                    cout << "Valid:" << endl;
-                    print_vector(valid_virtual[current_virtual-1]);
-                    cout << "Domination:" << endl;
-                    print_vector(domination_virtual[current_virtual-1]);
-                    cout << "c:" << endl;
-                    print_vector(c_virtual[current_virtual-1]);
-                    cout << "w:" << endl;
-                    print_vector(w_virtual[current_virtual-1]);
-                    cout << endl;
+                    //cout << "After forgetting " << *it_source_bag << endl;
+                    //cout << "Bag:" << endl;
+                    //print_vector(bag_virtual);
+                    //cout << "Forgotten:" << endl;
+                    //print_vector(number_of_neighbours_forgotten_virtual);
+                    //cout << "Present:" << endl;
+                    //print_vector(number_of_neighbours_present_virtual);
+                    //cout << "Valid:" << endl;
+                    //print_vector(valid_virtual[current_virtual-1]);
+                    //cout << "Domination:" << endl;
+                    //print_vector(domination_virtual[current_virtual-1]);
+                    //cout << "c:" << endl;
+                    //print_vector(c_virtual[current_virtual-1]);
+                    //cout << "w:" << endl;
+                    //print_vector(w_virtual[current_virtual-1]);
+                    //cout << endl;
                 }//END FORGET BLOCK
                 //cout << bag_virtual.size() << " " << log2(valid_virtual[current_virtual-1].size()) << endl;
                 forgotten_so_far++;
@@ -403,8 +362,8 @@ void Smartstorage<T>::take_virtual_step_introduce(
         p_virtual[parent_virtual-1].resize(0);
     }
 
-    number_of_neighbours_forgotten_virtual.insert(number_of_neighbours_forgotten_virtual.begin()+i, 0); // Move to walk_virtual_path
-    number_of_neighbours_present_virtual.insert(number_of_neighbours_present_virtual.begin()+i, 0);      // Move to walk_virtual_path
+    number_of_neighbours_forgotten_virtual.insert(number_of_neighbours_forgotten_virtual.begin()+i, 0);
+    number_of_neighbours_present_virtual.insert(number_of_neighbours_present_virtual.begin()+i, 0);
 
     T adjacency_mask = 0;
     T all_neighbours_accounted_mask = 0;
@@ -428,8 +387,8 @@ void Smartstorage<T>::take_virtual_step_introduce(
     if(number_of_neighbours_forgotten_virtual[i] + number_of_neighbours_present_virtual[i] ==  G.N[bag_virtual[i]-1].size())
         all_neighbours_accounted_mask |= (T(1) << i);
 
-    size_t remember_start = 0;
-    size_t remember_end = 0;
+    size_t remember_start = 0;  //current_index_zero,
+    size_t remember_end = 0;    //current_index_one
 
     T lowerbitmask = (T(1)<<i) - 1;
 
@@ -471,7 +430,7 @@ void Smartstorage<T>::take_virtual_step_introduce(
                 T domination_lower = domination_virtual[current_virtual-1][remember_start] & lowerbitmask;
                 T domination_higher = (domination_virtual[current_virtual-1][remember_start] - domination_lower) << 1;
 
-                if((adjacency_mask & (higher_start | lower_start)) == 0)  
+                if((adjacency_mask & (higher_start | lower_start)) == 0)  // Where is the domination check?
                 {
                     valid_virtual[parent_virtual-1].push_back(higher_start | (T(1)<<i) | lower_start);
                     domination_virtual[parent_virtual-1].push_back((domination_higher + (T(1)<<i) + domination_lower) | adjacency_mask);
@@ -594,10 +553,10 @@ void Smartstorage<T>::take_virtual_step_forget(const int current_virtual,
                     domination_virtual[parent_virtual-1].back() = higher_one_domination + lower_one_domination;
                     c_virtual[parent_virtual-1].back() = c_virtual[current_virtual-1][current_index_one];
                     // w. Needn't update w
-                    current_index_one++;
-                    while(current_index_one<valid_virtual[current_virtual-1].size() && ((valid_virtual[current_virtual-1][current_index_one] & (T(1)<<i)) == 0))
-                        current_index_one++;
                 }
+                current_index_one++;
+                while(current_index_one<valid_virtual[current_virtual-1].size() && ((valid_virtual[current_virtual-1][current_index_one] & (T(1)<<i)) == 0))
+                    current_index_one++;
             }
             current_index_zero++;
             while(current_index_zero<valid_virtual[current_virtual-1].size() && ((valid_virtual[current_virtual-1][current_index_zero] & (T(1)<<i)) != 0))
@@ -940,20 +899,20 @@ void Smartstorage<T>::end_virtual_path_no_files(const int current, const RootedT
         vector<int> w_temporary;
         vector<int> p_temporary;
 
-        size_t index_right = 0;
-        for(size_t index_left = 0; index_left < validcandidates[parent-1].size(); index_left++)
+        size_t index_virtual = 0;
+        for(size_t index_parent = 0; index_parent < validcandidates[parent-1].size(); index_parent++)
         {
-            while(index_right < valid_virtual.size() && valid_virtual[index_right] < validcandidates[parent-1][index_left])
-                index_right++;
-            if(index_right < valid_virtual.size() && valid_virtual[index_right] == validcandidates[parent-1][index_left])
+            while(index_virtual < valid_virtual.size() && valid_virtual[index_virtual] < validcandidates[parent-1][index_parent])
+                index_virtual++;
+            if(index_virtual < valid_virtual.size() && valid_virtual[index_virtual] == validcandidates[parent-1][index_parent])
             {
                 // consider adding
-                if(((domination[parent-1][index_left] | domination_virtual[index_right]) & all_neighbours_accounted_for_mask) == all_neighbours_accounted_for_mask)
+                if(((domination[parent-1][index_parent] | domination_virtual[index_virtual]) & all_neighbours_accounted_for_mask) == all_neighbours_accounted_for_mask)
                 {
-                    valid_temporary.push_back(validcandidates[parent-1][index_left]);
-                    domination_temporary.push_back(domination[parent-1][index_left] | domination_virtual[index_right]);
-                    c_temporary.push_back(c[parent-1][index_left] + c_virtual[index_right]);
-                    w_temporary.push_back(w[parent-1][index_left]);
+                    valid_temporary.push_back(validcandidates[parent-1][index_parent]);
+                    domination_temporary.push_back(domination[parent-1][index_parent] | domination_virtual[index_virtual]);
+                    c_temporary.push_back(c[parent-1][index_parent] + c_virtual[index_virtual]);
+                    w_temporary.push_back(w[parent-1][index_parent]);
                     
                     if(track_solution)
                     {
@@ -986,3 +945,140 @@ void Smartstorage<T>::end_virtual_path_no_files(const int current, const RootedT
         */
     }
 }
+
+
+/*
+template<typename T>
+void Smartstorage<T>::take_virtual_step_introduce(
+    const int current_virtual, 
+    vector<vector<T>>& valid_virtual,
+    vector<vector<T>>& domination_virtual,
+    vector<vector<int>>& c_virtual, 
+    vector<vector<int>>& w_virtual,
+    vector<vector<int>>& p_virtual, 
+    const int i,
+    const vector<int>& bag_virtual,
+    vector<int>& number_of_neighbours_forgotten_virtual,
+    vector<int>& number_of_neighbours_present_virtual
+    )
+{
+    int parent_virtual = (current_virtual%2) + 1;
+
+    valid_virtual[parent_virtual-1].resize(0);
+    domination_virtual[parent_virtual-1].resize(0);
+    c_virtual[parent_virtual-1].resize(0);
+    w_virtual[parent_virtual-1].resize(0);
+
+    if(track_solution)
+    {
+        p_virtual[parent_virtual-1].resize(0);
+    }
+
+    number_of_neighbours_forgotten_virtual.insert(number_of_neighbours_forgotten_virtual.begin()+i, 0);
+    number_of_neighbours_present_virtual.insert(number_of_neighbours_present_virtual.begin()+i, 0);
+
+    T adjacency_mask = 0;
+    T all_neighbours_accounted_mask = 0;
+
+    int k = 0;
+    for(int j = 0; j < bag_virtual.size(); j++)
+    {
+        while(k<G.N[bag_virtual[i]-1].size() && G.N[bag_virtual[i]-1][k] < bag_virtual[j])
+            k++;
+        if(k<G.N[bag_virtual[i]-1].size() && G.N[bag_virtual[i]-1][k] == bag_virtual[j])
+        {
+            adjacency_mask |= (T(1) << j);
+            number_of_neighbours_present_virtual[i]++;
+            number_of_neighbours_present_virtual[j]++;
+        }
+        // Moved it outside of above if statement
+        if(number_of_neighbours_forgotten_virtual[j] + number_of_neighbours_present_virtual[j] ==  G.N[bag_virtual[j]-1].size())
+            all_neighbours_accounted_mask |= (T(1) << j);
+    }
+    // number_of_neighbours_present[i] only fully updated after loop(doing it extra for i in loop is fine)
+    if(number_of_neighbours_forgotten_virtual[i] + number_of_neighbours_present_virtual[i] ==  G.N[bag_virtual[i]-1].size())
+        all_neighbours_accounted_mask |= (T(1) << i);
+
+    size_t remember_start = 0;
+    size_t remember_end = 0;
+
+    T lowerbitmask = (T(1)<<i) - 1;
+
+    for(size_t current_index = 0; current_index < valid_virtual[current_virtual-1].size();)
+    {
+        T lower = valid_virtual[current_virtual-1][current_index] & lowerbitmask;
+        T higher = (valid_virtual[current_virtual-1][current_index] - lower) << 1;
+
+        T lower_start = valid_virtual[current_virtual-1][remember_start] & lowerbitmask;
+        T higher_start = (valid_virtual[current_virtual-1][remember_start] - lower_start) << 1;
+
+        if(higher == higher_start)
+        {
+            T domination_lower = domination_virtual[current_virtual-1][current_index] & lowerbitmask;
+            T domination_higher = (domination_virtual[current_virtual-1][current_index] - domination_lower) << 1;
+
+            bool domination_status = (T((lower+higher) & adjacency_mask) != 0);
+            if(((domination_higher + (T(domination_status)<< i) + domination_lower) & all_neighbours_accounted_mask) == all_neighbours_accounted_mask)
+            {
+                valid_virtual[parent_virtual-1].push_back(higher | lower);
+                domination_virtual[parent_virtual-1].push_back(domination_higher + (T(domination_status)<< i) + domination_lower);
+                c_virtual[parent_virtual-1].push_back(c_virtual[current_virtual-1][current_index]);
+                w_virtual[parent_virtual-1].push_back(w_virtual[current_virtual-1][current_index]);
+                if(track_solution)
+                {
+                    p_virtual[parent_virtual-1].push_back(p_virtual[current_virtual-1][current_index]);
+                }
+            }
+            remember_end = current_index;
+            current_index++;
+        }
+        else
+        {
+            for(;remember_start <= remember_end; remember_start++)
+            {
+                T lower_start = valid_virtual[current_virtual-1][remember_start] & lowerbitmask;
+                T higher_start = (valid_virtual[current_virtual-1][remember_start] - lower_start) << 1;
+
+                T domination_lower = domination_virtual[current_virtual-1][remember_start] & lowerbitmask;
+                T domination_higher = (domination_virtual[current_virtual-1][remember_start] - domination_lower) << 1;
+
+                if((adjacency_mask & (higher_start | lower_start)) == 0)  // Where is the domination check?
+                {
+                    valid_virtual[parent_virtual-1].push_back(higher_start | (T(1)<<i) | lower_start);
+                    domination_virtual[parent_virtual-1].push_back((domination_higher + (T(1)<<i) + domination_lower) | adjacency_mask);
+                    c_virtual[parent_virtual-1].push_back(c_virtual[current_virtual-1][remember_start] + G.weights[bag_virtual[i]-1]);
+                    w_virtual[parent_virtual-1].push_back(w_virtual[current_virtual-1][remember_start] + G.weights[bag_virtual[i]-1]);
+                    if(track_solution)
+                    {
+                        p_virtual[parent_virtual-1].push_back(p_virtual[current_virtual-1][remember_start]);
+                    }
+                }
+            }
+        }
+
+    }
+
+    //CASE current_index reached end of array but there are still to add.
+    for(;remember_start <= remember_end; remember_start++)
+    {
+        T lower_start = valid_virtual[current_virtual-1][remember_start] & lowerbitmask;
+        T higher_start = (valid_virtual[current_virtual-1][remember_start] - lower_start) << 1;
+
+        T domination_lower = domination_virtual[current_virtual-1][remember_start] & lowerbitmask;
+        T domination_higher = (domination_virtual[current_virtual-1][remember_start] - domination_lower) << 1;
+
+        if((adjacency_mask & (higher_start | lower_start)) == 0)
+        {
+            valid_virtual[parent_virtual-1].push_back(higher_start | (T(1)<<i) | lower_start);
+            domination_virtual[parent_virtual-1].push_back((domination_higher + (T(1)<<i) + domination_lower) | adjacency_mask);
+            c_virtual[parent_virtual-1].push_back(c_virtual[current_virtual-1][remember_start]+G.weights[bag_virtual[i]-1]);
+            w_virtual[parent_virtual-1].push_back(w_virtual[current_virtual-1][remember_start]+G.weights[bag_virtual[i]-1]);
+            if(track_solution)
+            {
+                p_virtual[parent_virtual-1].push_back(p_virtual[current_virtual-1][remember_start]);
+            }
+        }
+    }
+}
+
+*/
