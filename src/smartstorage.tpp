@@ -51,6 +51,7 @@ void Smartstorage<T>::finish(const int current, const RootedTree& RT)
         initialize_leaf(current,RT);
     }
     update_current(current, RT);
+    cout << log2(validcandidates[current-1].size()) << "," << bags[current-1].size() << endl;
     if(current != RT.root)
     {
         update_to_parent(current, RT);
@@ -61,8 +62,8 @@ template<typename T>
 void Smartstorage<T>::cleanup(const RootedTree& RT)
 {
     int current = RT.root;
-    cout << *max_element(c[current-1].begin(), c[current-1].end()) << endl;
-    cout << max_element(c[current-1].begin(), c[current-1].end())-c[current-1].begin() << endl;
+    //cout << *max_element(c[current-1].begin(), c[current-1].end()) << endl;
+    //cout << max_element(c[current-1].begin(), c[current-1].end())-c[current-1].begin() << endl;
 }
 
 template<typename T>
@@ -172,8 +173,8 @@ void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)
                     int i = it_source_bag-source_bag.begin()-forgotten_so_far;
 
                     take_virtual_step_forget(current_virtual, c_virtual, p_virtual, i, bag_virtual, valid_virtual);
-
                     swap(current_virtual, parent_virtual);
+                    cout << log2(valid_virtual[current_virtual-1].size()) << "," << bag_virtual.size() << endl;
                 }//END FORGET BLOCK
                 forgotten_so_far++;
                 it_source_bag++;
@@ -191,6 +192,7 @@ void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)
 
             take_virtual_step_forget(current_virtual, c_virtual, p_virtual, i, bag_virtual, valid_virtual);
             swap(current_virtual, parent_virtual);
+            cout << log2(valid_virtual[current_virtual-1].size()) << "," << bag_virtual.size() << endl;
         }//END FORGET BLOCK
         forgotten_so_far++;
         it_source_bag++;
@@ -227,6 +229,7 @@ void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)
 
                     take_virtual_step_introduce(current_virtual, c_virtual, p_virtual, i, bag_virtual, valid_virtual);
                     swap(current_virtual,parent_virtual);
+                    cout << log2(valid_virtual[current_virtual-1].size()) << "," << bag_virtual.size() << endl;
                 }//END INTRODUCE BLOCK
                 introduced_so_far++;
                 it_target_bag++;
@@ -245,6 +248,7 @@ void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)
 
             take_virtual_step_introduce(current_virtual, c_virtual, p_virtual, i, bag_virtual, valid_virtual);
             swap(current_virtual, parent_virtual);
+            cout << log2(valid_virtual[current_virtual-1].size()) << "," << bag_virtual.size() << endl;
 
         }//END INTRODUCE BLOCK
         introduced_so_far++;

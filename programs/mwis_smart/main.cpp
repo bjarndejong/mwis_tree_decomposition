@@ -69,33 +69,33 @@ int main(int argc, char* argv[])
     // Create a stringstream to capture std::cout output
     // Store the original cout buffer to restore later
     // Redirect cout to stringstream
-    stringstream buffer;
-    streambuf* originalCoutBuffer = cout.rdbuf();
-    cout.rdbuf(buffer.rdbuf());
+    //stringstream buffer;
+    //streambuf* originalCoutBuffer = cout.rdbuf();
+    //cout.rdbuf(buffer.rdbuf());
 
-    auto timestamp1 = chrono::high_resolution_clock::now();
+    //auto timestamp1 = chrono::high_resolution_clock::now();
     RT.df_traversal(
         bind(&Smartstorage<__uint128_t>::setup, &S, placeholders::_1),
         bind(&Smartstorage<__uint128_t>::discover, &S, placeholders::_1, placeholders::_2),
         bind(&Smartstorage<__uint128_t>::finish, &S, placeholders::_1, placeholders::_2),  //[](const int&,const RootedTree&){} -- lambda dummy
         bind(&Smartstorage<__uint128_t>::cleanup, &S, placeholders::_1)
     );
-    auto timestamp2 = chrono::high_resolution_clock::now();
+    //auto timestamp2 = chrono::high_resolution_clock::now();
     //Restore cout
-    cout.rdbuf(originalCoutBuffer);
+    //cout.rdbuf(originalCoutBuffer);
     
-    int capturedValue = 0;
-    int capturedPosition = 0;
-    buffer >> capturedValue;
-    buffer >> capturedPosition;
+    //int capturedValue = 0;
+    //int capturedPosition = 0;
+    //buffer >> capturedValue;
+    //buffer >> capturedPosition;
 
 
-    cout << capturedValue << endl;
-    chrono::duration<double> duration = timestamp2 - timestamp1;
+    //cout << capturedValue << endl;
+    //chrono::duration<double> duration = timestamp2 - timestamp1;
 
-    cout << duration.count() << endl;
+    //cout << duration.count() << endl;
 
-    if(track_solution)
+    /*if(track_solution)
     {
         Solution<__uint128_t> MWIS(S,capturedPosition);
         RT.df_traversal(
@@ -106,6 +106,6 @@ int main(int argc, char* argv[])
         );
         print_vector(MWIS.MWIS);
         //cout << G.weight_set(MWIS.MWIS) << endl;
-    }
+    }*/
     return 0;
 }
