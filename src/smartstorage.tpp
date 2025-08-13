@@ -13,6 +13,7 @@
 #include "graph.h"
 #include "rootedtree.h"
 #include "general.h"
+#include "addressable_priority_queue.h"
 
 using namespace std;
 
@@ -93,7 +94,7 @@ void Smartstorage<T>::finish(const int current, const RootedTree& RT)
     cout << "w:" << endl;
     print_vector(w[current-1]);
     */
-    cout << log2(validcandidates[current-1].size()) << endl;
+    //cout << log2(validcandidates[current-1].size()) << "," << bags[current-1].size() << endl;
     //cout << endl;
     // */
     if(current != RT.root)
@@ -106,7 +107,7 @@ template<typename T>
 void Smartstorage<T>::cleanup(const RootedTree& RT)
 {
     int current = RT.root;
-    //cout << *max_element(c[current-1].begin(), c[current-1].end()) << endl;
+    cout << *max_element(c[current-1].begin(), c[current-1].end()) << endl;
     //cout << max_element(c[current-1].begin(), c[current-1].end())-c[current-1].begin() << endl;
 }
 
@@ -146,9 +147,6 @@ void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)
     vector<vector<T>> valid_virtual(2);
     vector<vector<T>> domination_virtual(2);
 
-    vector<vector<int>> neihbours_forgotten_virtual(2);
-    vector<vector<int>> neighbours_present_virtual(2);
-
     begin_virtual_path(current, RT, 
         valid_virtual[current_virtual-1],
         domination_virtual[current_virtual-1],
@@ -182,8 +180,8 @@ void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)
             }
             else
             {
-                //Forget *it_source_bag
-                {//BEGIN FORGET BLOCK
+                // Forget *it_source_bag
+                {// BEGIN FORGET BLOCK
                     auto it = lower_bound(bag_virtual.begin(), bag_virtual.end(), *it_source_bag);
                     bag_virtual.erase(it);
 
@@ -218,11 +216,10 @@ void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)
                     cout << "w:" << endl;
                     print_vector(w_virtual[current_virtual-1]);
                     */
-                    cout << log2(valid_virtual[current_virtual-1].size()) << endl;
+                    //cout << log2(valid_virtual[current_virtual-1].size()) << "," << bag_virtual.size() << endl;
                     //cout << endl;
                     // */
-                }//END FORGET BLOCK
-                //cout << bag_virtual.size() << " " << log2(valid_virtual[current_virtual-1].size()) << endl;
+                }// END FORGET BLOCK
                 forgotten_so_far++;
                 it_source_bag++;
             }
@@ -230,8 +227,8 @@ void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)
     }
     while(it_source_bag != source_bag.end())
     {
-        //Forget *it_source_bag
-        {//BEGIN FORGET BLOCK
+        // Forget *it_source_bag
+        {// BEGIN FORGET BLOCK
             auto it = lower_bound(bag_virtual.begin(), bag_virtual.end(), *it_source_bag);
             bag_virtual.erase(it);
 
@@ -266,15 +263,18 @@ void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)
             cout << "w:" << endl;
             print_vector(w_virtual[current_virtual-1]);
             */
-            cout << log2(valid_virtual[current_virtual-1].size()) << endl;
+            //cout << log2(valid_virtual[current_virtual-1].size()) << "," << bag_virtual.size() << endl;
             //cout << endl;
-        }//END FORGET BLOCK
+        }// END FORGET BLOCK
         forgotten_so_far++;
         it_source_bag++;
     }
 
 
-    //Intersection of source_bag and target_bag is reached
+    // Intersection of source_bag and target_bag is reached
+
+
+    vector<int> vertices_to_introduce;
 
     it_intersection_bag = intersection_bag.begin();
     vector<int>::const_iterator it_target_bag = target_bag.begin();
@@ -294,12 +294,15 @@ void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)
             }
             else
             {
-                //Introduce *it_target_bag
-                {//BEGIN INTRODUCE BLOCK
+                // Introduce *it_target_bag
+                {// BEGIN INTRODUCE BLOCK
+                    /*
                     auto it = lower_bound(bag_virtual.begin(), bag_virtual.end(), *it_target_bag);
-                    bag_virtual.insert(it, *it_target_bag);
+                    
 
-                    int i = it_intersection_bag-intersection_bag.begin()+introduced_so_far;
+                    int i = it - bag_virtual.begin();
+
+                    bag_virtual.insert(it, *it_target_bag);
 
                     take_virtual_step_introduce(current_virtual, 
                         valid_virtual,
@@ -312,6 +315,8 @@ void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)
                         number_of_neighbours_forgotten_virtual,
                         number_of_neighbours_present_virtual);
                     swap(current_virtual,parent_virtual);
+                    */
+                    vertices_to_introduce.push_back(*it_target_bag);
                     /*
                     cout << "After introducing " << *it_target_bag << endl;
                     cout << "Bag:" << endl;
@@ -329,9 +334,9 @@ void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)
                     cout << "w:" << endl;
                     print_vector(w_virtual[current_virtual-1]);
                     */
-                    cout << log2(valid_virtual[current_virtual-1].size()) << endl;
+                    //cout << log2(valid_virtual[current_virtual-1].size()) << "," << bag_virtual.size() << endl;
                     //cout << endl;
-                }//END INTRODUCE BLOCK
+                }// END INTRODUCE BLOCK
                 introduced_so_far++;
                 it_target_bag++;
 
@@ -341,11 +346,14 @@ void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)
     while(it_target_bag != target_bag.end())        //introduce what's left
     {
         //Introduce *it_target_bag
-        {//Begin Introduce Block
+        {// Begin Introduce Block
+            /*
             auto it = lower_bound(bag_virtual.begin(), bag_virtual.end(), *it_target_bag);
-            bag_virtual.insert(it, *it_target_bag);
+            
 
-            int i = it_intersection_bag-intersection_bag.begin()+introduced_so_far;     //Relevant bitposition
+            int i = it - bag_virtual.begin();// Relevant bitposition
+
+            bag_virtual.insert(it, *it_target_bag);
 
             take_virtual_step_introduce(current_virtual, 
                 valid_virtual,
@@ -358,6 +366,8 @@ void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)
                 number_of_neighbours_forgotten_virtual,
                 number_of_neighbours_present_virtual);
             swap(current_virtual, parent_virtual);
+            */
+            vertices_to_introduce.push_back(*it_target_bag);
             /*
             cout << "After introducing " << *it_target_bag << endl;
             cout << "Bag:" << endl;
@@ -375,17 +385,55 @@ void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)
             cout << "w:" << endl;
             print_vector(w_virtual[current_virtual-1]);
             */
-            cout << log2(valid_virtual[current_virtual-1].size()) << endl;
+            //cout << log2(valid_virtual[current_virtual-1].size()) << "," << bag_virtual.size() << endl;
             //cout << endl;
-            
-
-        }//END INTRODUCE BLOCK
+        }// END INTRODUCE BLOCK
         introduced_so_far++;
         it_target_bag++;
     }
     //if(store_c)
     //    end_virtual_path(current, RT, c_virtual[current_virtual-1], p_virtual[current_virtual-1], valid_virtual[current_virtual-1]);
     //else
+
+    // cout << log2(valid_virtual[current_virtual-1].size()) << "," << bag_virtual.size() << endl;
+
+    
+    AddressablePriorityQueue<int,greater<int>,plus<int>> APQ(vertices_to_introduce.size());
+    for(int x = 1; x<=vertices_to_introduce.size(); x++)
+    {
+        int key = 0;
+        for(int y = 0; y < bag_virtual.size(); y++)
+            if(G.adjacent(vertices_to_introduce[x-1],bag_virtual[y]))
+                key++;
+        APQ.insertElement(x,key);
+    }
+    for(int temp = 0; temp<vertices_to_introduce.size();temp++)
+    {
+        int x = APQ.deleteRoot();
+        auto it = lower_bound(bag_virtual.begin(), bag_virtual.end(), vertices_to_introduce[x-1]);
+            
+
+        int i = it - bag_virtual.begin();// Relevant bitposition
+
+        bag_virtual.insert(it, vertices_to_introduce[x-1]);
+
+        take_virtual_step_introduce(current_virtual, 
+                valid_virtual,
+                domination_virtual,
+                c_virtual,
+                w_virtual,
+                p_virtual, 
+                i, 
+                bag_virtual,
+                number_of_neighbours_forgotten_virtual,
+                number_of_neighbours_present_virtual);
+        swap(current_virtual, parent_virtual);
+        for(int y = 0; y<vertices_to_introduce.size(); y++)
+            if(G.adjacent(vertices_to_introduce[x-1],vertices_to_introduce[y]) && APQ.p[y]!=-1)
+                APQ.updateKey(y+1,1);
+    }
+
+
     end_virtual_path_no_files(current, RT, 
         valid_virtual[current_virtual-1],
         domination_virtual[current_virtual-1],
@@ -449,9 +497,6 @@ void Smartstorage<T>::take_virtual_step_introduce(
     if(number_of_neighbours_forgotten_virtual[i] + number_of_neighbours_present_virtual[i] ==  G.N[bag_virtual[i]-1].size())
         all_neighbours_accounted_for_mask |= (T(1) << i);
 
-    //size_t remember_start = 0;  //current_index_zero,
-    //size_t remember_end = 0;    //current_index_one
-
     size_t current_index_zero = 0;
     size_t current_index_one = 0;
 
@@ -494,7 +539,7 @@ void Smartstorage<T>::take_virtual_step_introduce(
             current_index_one++;
         }
     }
-
+    // Do remainder
     while(current_index_zero < valid_virtual[current_virtual-1].size())
     {
         T lower_zero = valid_virtual[current_virtual-1][current_index_zero] & lowerbitmask;
@@ -515,7 +560,6 @@ void Smartstorage<T>::take_virtual_step_introduce(
         }
         current_index_zero++;
     }
-
     while(current_index_one < valid_virtual[current_virtual-1].size())
     {
         T lower_one = valid_virtual[current_virtual-1][current_index_one] & lowerbitmask;
@@ -531,84 +575,6 @@ void Smartstorage<T>::take_virtual_step_introduce(
         }
         current_index_one++;
     }
-    //cout << log2(valid_virtual[parent_virtual-1].size()) << endl;
-    /*
-    for(size_t current_index = 0; current_index < valid_virtual[current_virtual-1].size();)
-    {
-        T lower = valid_virtual[current_virtual-1][current_index] & lowerbitmask;
-        T higher = (valid_virtual[current_virtual-1][current_index] - lower) << 1;
-
-        T lower_start = valid_virtual[current_virtual-1][remember_start] & lowerbitmask;
-        T higher_start = (valid_virtual[current_virtual-1][remember_start] - lower_start) << 1;
-
-        if(higher == higher_start)
-        {
-            T domination_lower = domination_virtual[current_virtual-1][current_index] & lowerbitmask;
-            T domination_higher = (domination_virtual[current_virtual-1][current_index] - domination_lower) << 1;
-
-            bool domination_status = (T((lower+higher) & adjacency_mask) != 0);
-            if(((domination_higher + (T(domination_status)<< i) + domination_lower) & all_neighbours_accounted_for_mask) == all_neighbours_accounted_mask)
-            {
-                valid_virtual[parent_virtual-1].push_back(higher | lower);
-                domination_virtual[parent_virtual-1].push_back(domination_higher + (T(domination_status)<< i) + domination_lower);
-                c_virtual[parent_virtual-1].push_back(c_virtual[current_virtual-1][current_index]);
-                w_virtual[parent_virtual-1].push_back(w_virtual[current_virtual-1][current_index]);
-                if(track_solution)
-                {
-                    p_virtual[parent_virtual-1].push_back(p_virtual[current_virtual-1][current_index]);
-                }
-            }
-            remember_end = current_index;
-            current_index++;
-        }
-        else
-        {
-            for(;remember_start <= remember_end; remember_start++)
-            {
-                T lower_start = valid_virtual[current_virtual-1][remember_start] & lowerbitmask;
-                T higher_start = (valid_virtual[current_virtual-1][remember_start] - lower_start) << 1;
-
-                T domination_lower = domination_virtual[current_virtual-1][remember_start] & lowerbitmask;
-                T domination_higher = (domination_virtual[current_virtual-1][remember_start] - domination_lower) << 1;
-
-                if((adjacency_mask & (higher_start | lower_start)) == 0)  // Where is the domination check?
-                {
-                    valid_virtual[parent_virtual-1].push_back(higher_start | (T(1)<<i) | lower_start);
-                    domination_virtual[parent_virtual-1].push_back((domination_higher + (T(1)<<i) + domination_lower) | adjacency_mask);
-                    c_virtual[parent_virtual-1].push_back(c_virtual[current_virtual-1][remember_start] + G.weights[bag_virtual[i]-1]);
-                    w_virtual[parent_virtual-1].push_back(w_virtual[current_virtual-1][remember_start] + G.weights[bag_virtual[i]-1]);
-                    if(track_solution)
-                    {
-                        p_virtual[parent_virtual-1].push_back(p_virtual[current_virtual-1][remember_start]);
-                    }
-                }
-            }
-        }
-
-    }
-
-    //CASE current_index reached end of array but there are still to add.
-    for(;remember_start <= remember_end; remember_start++)
-    {
-        T lower_start = valid_virtual[current_virtual-1][remember_start] & lowerbitmask;
-        T higher_start = (valid_virtual[current_virtual-1][remember_start] - lower_start) << 1;
-
-        T domination_lower = domination_virtual[current_virtual-1][remember_start] & lowerbitmask;
-        T domination_higher = (domination_virtual[current_virtual-1][remember_start] - domination_lower) << 1;
-
-        if((adjacency_mask & (higher_start | lower_start)) == 0)
-        {
-            valid_virtual[parent_virtual-1].push_back(higher_start | (T(1)<<i) | lower_start);
-            domination_virtual[parent_virtual-1].push_back((domination_higher + (T(1)<<i) + domination_lower) | adjacency_mask);
-            c_virtual[parent_virtual-1].push_back(c_virtual[current_virtual-1][remember_start]+G.weights[bag_virtual[i]-1]);
-            w_virtual[parent_virtual-1].push_back(w_virtual[current_virtual-1][remember_start]+G.weights[bag_virtual[i]-1]);
-            if(track_solution)
-            {
-                p_virtual[parent_virtual-1].push_back(p_virtual[current_virtual-1][remember_start]);
-            }
-        }
-    }
-    */
 }
 
 template<typename T>
@@ -634,7 +600,7 @@ void Smartstorage<T>::take_virtual_step_forget(const int current_virtual,
     {
         p_virtual[parent_virtual-1].resize(0);
     }
-    //cout << "I'm forgetting " << forgotten_vertex <<endl;
+
     number_of_neighbours_forgotten_virtual.erase(number_of_neighbours_forgotten_virtual.begin() + i);
     number_of_neighbours_present_virtual.erase(number_of_neighbours_present_virtual.begin() + i);
 
@@ -650,7 +616,6 @@ void Smartstorage<T>::take_virtual_step_forget(const int current_virtual,
         }
     }
     
-    //print_vector(number_of_neighbours_forgotten_virtual);
 
     T lowerbitmask = (T(1)<<i) - 1;
     // Do two walks through the vector simultaneously, similar as to a merge.
@@ -761,8 +726,6 @@ void Smartstorage<T>::take_virtual_step_forget(const int current_virtual,
         while(current_index_one<valid_virtual[current_virtual-1].size() && ((valid_virtual[current_virtual-1][current_index_one] & (T(1)<<i)) == 0))
             current_index_one++;
     }
-
-    //cout << log2(valid_virtual[parent_virtual-1].size()) << endl;
 }
 
 
@@ -771,8 +734,6 @@ void Smartstorage<T>::initialize_leaf(const int current, const RootedTree& RT)
 {
     int parent = current;
     //int neighbourposition = RT.neighbourIterators[parent-1] - RT.N[parent-1].begin();
-
-    //cout << "Initializing bag " << current << "(" << bags[current-1].size() << ")" << endl;
 
     const vector<int>& source_bag = vector<int>();
     const vector<int>& target_bag = bags[parent-1];
@@ -796,7 +757,7 @@ void Smartstorage<T>::initialize_leaf(const int current, const RootedTree& RT)
     if(track_solution)
     {
         p_virtual[current_virtual-1] = vector<int>(1,0);  //P
-        iota(p_virtual[current_virtual-1].begin(), p_virtual[current_virtual-1].end(), 0);              //P, initalizes p to right position, itself
+        iota(p_virtual[current_virtual-1].begin(), p_virtual[current_virtual-1].end(), 0);              //P, initalized p to correct position, itself
     }
     }/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     vector<int> bag_virtual = source_bag;
@@ -979,11 +940,11 @@ void Smartstorage<T>::begin_virtual_path(const int current, const RootedTree& RT
     c_virtual = move(c[current-1]);  
     c[current-1] = vector<int>();               // Free space just in case               
     w_virtual = move(w[current-1]);
-    w[current-1] = vector<int>();
+    w[current-1] = vector<int>();               // Free space just in case 
     if(track_solution)
     {
         p_virtual = vector<int>(c_virtual.size(),0);  //P
-        iota(p_virtual.begin(), p_virtual.end(), 0);              //P, initalizes p to right position, itself
+        iota(p_virtual.begin(), p_virtual.end(), 0);              //P, initalizes p to correct position, itself
     }
 }
 
