@@ -14,6 +14,7 @@
 #include "rootedtree.h"
 #include "general.h"
 #include "addressable_priority_queue.h"
+#include "store_on_file.h"
 
 using namespace std;
 
@@ -94,7 +95,7 @@ void Smartstorage<T>::finish(const int current, const RootedTree& RT)
     cout << "w:" << endl;
     print_vector(w[current-1]);
     */
-    //cout << log2(validcandidates[current-1].size()) << "," << bags[current-1].size() << endl;
+    cout << log2(validcandidates[current-1].size()) << "," << bags[current-1].size() << endl;
     //cout << endl;
     // */
     if(current != RT.root)
@@ -133,6 +134,7 @@ void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)
     int parent = RT.parents[current-1];
     //int neighbourposition = RT.neighbourIterators[parent-1] - RT.N[parent-1].begin();
 
+    cout << "WALKING FROM " << current << " TO " << parent << ":" << endl;
 
     const vector<int>& source_bag = bags[current-1];
     const vector<int>& target_bag = bags[parent-1];
@@ -395,9 +397,8 @@ void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)
     //    end_virtual_path(current, RT, c_virtual[current_virtual-1], p_virtual[current_virtual-1], valid_virtual[current_virtual-1]);
     //else
 
-    // cout << log2(valid_virtual[current_virtual-1].size()) << "," << bag_virtual.size() << endl;
+    cout << log2(valid_virtual[current_virtual-1].size()) << "," << bag_virtual.size() << endl;
 
-    
     AddressablePriorityQueue<int,greater<int>,plus<int>> APQ(vertices_to_introduce.size());
     for(int x = 1; x<=vertices_to_introduce.size(); x++)
     {
@@ -409,7 +410,20 @@ void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)
     }
     for(int temp = 0; temp<vertices_to_introduce.size();temp++)
     {
+        int key = APQ.v[0].second;
         int x = APQ.deleteRoot();
+        //if(key == 0)
+        //{
+        //    cout << "Warning; trying to introduce " << vertices_to_introduce[x-1] << " with key 0 which has degree " << G.N[vertices_to_introduce[x-1]-1].size() << endl; 
+        //    if(validcandidates[parent-1].size()>0)
+        //    {
+        //        int positioninparent = lower_bound(bags[parent-1].begin(),bags[parent-1].end(),vertices_to_introduce[x-1]) - bags[parent-1].begin();
+        //        cout << "Looking for " 
+        //            << G.N[vertices_to_introduce[x-1]-1].size() - number_of_neighbours_present[parent-1][positioninparent] - number_of_neighbours_forgotten[parent-1][positioninparent] 
+        //            << " neighbours" << endl;
+        //    }
+        //        
+        //}
         auto it = lower_bound(bag_virtual.begin(), bag_virtual.end(), vertices_to_introduce[x-1]);
             
 
@@ -428,11 +442,13 @@ void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)
                 number_of_neighbours_forgotten_virtual,
                 number_of_neighbours_present_virtual);
         swap(current_virtual, parent_virtual);
+        cout << log2(valid_virtual[current_virtual-1].size()) << "," << bag_virtual.size() << endl;
         for(int y = 0; y<vertices_to_introduce.size(); y++)
             if(G.adjacent(vertices_to_introduce[x-1],vertices_to_introduce[y]) && APQ.p[y]!=-1)
                 APQ.updateKey(y+1,1);
     }
 
+    cout << log2(valid_virtual[current_virtual-1].size()) << "," << bag_virtual.size() << endl;
 
     end_virtual_path_no_files(current, RT, 
         valid_virtual[current_virtual-1],
@@ -735,6 +751,8 @@ void Smartstorage<T>::initialize_leaf(const int current, const RootedTree& RT)
     int parent = current;
     //int neighbourposition = RT.neighbourIterators[parent-1] - RT.N[parent-1].begin();
 
+    cout << "LEAF " << current << ":" << endl;
+
     const vector<int>& source_bag = vector<int>();
     const vector<int>& target_bag = bags[parent-1];
 
@@ -769,6 +787,7 @@ void Smartstorage<T>::initialize_leaf(const int current, const RootedTree& RT)
     //vector<int>::const_iterator it_source_bag = source_bag.begin();
     vector<int>::const_iterator it_intersection_bag = intersection_bag.begin();
 
+    vector<int> vertices_to_introduce;
 
     //Intersection of source_bag and target_bag is reached
 
@@ -792,6 +811,7 @@ void Smartstorage<T>::initialize_leaf(const int current, const RootedTree& RT)
             {
                 //Introduce *it_target_bag
                 {//BEGIN INTRODUCE BLOCK
+                    /*
                     auto it = lower_bound(bag_virtual.begin(), bag_virtual.end(), *it_target_bag);
                     bag_virtual.insert(it, *it_target_bag);
 
@@ -809,6 +829,8 @@ void Smartstorage<T>::initialize_leaf(const int current, const RootedTree& RT)
                         number_of_neighbours_present_virtual
                     );
                     swap(current_virtual,parent_virtual);
+                    */
+                   vertices_to_introduce.push_back(*it_target_bag);
                 }//END INTRODUCE BLOCK
                 introduced_so_far++;
                 it_target_bag++;
@@ -822,6 +844,7 @@ void Smartstorage<T>::initialize_leaf(const int current, const RootedTree& RT)
     {
         //Introduce *it_target_bag
         {//Begin Introduce Block
+            /*
             auto it = lower_bound(bag_virtual.begin(), bag_virtual.end(), *it_target_bag);
             bag_virtual.insert(it, *it_target_bag);
 
@@ -839,10 +862,52 @@ void Smartstorage<T>::initialize_leaf(const int current, const RootedTree& RT)
                 number_of_neighbours_present_virtual
             );
             swap(current_virtual, parent_virtual);
-
+            */
+            vertices_to_introduce.push_back(*it_target_bag);
         }//END INTRODUCE BLOCK
         introduced_so_far++;
         it_target_bag++;
+    }
+
+    cout << log2(valid_virtual[current_virtual-1].size()) << "," << bag_virtual.size() << endl;
+
+    AddressablePriorityQueue<int,greater<int>,plus<int>> APQ(vertices_to_introduce.size());
+    for(int x = 1; x<=vertices_to_introduce.size(); x++)
+    {
+        int key = 0;
+        for(int y = 0; y < bag_virtual.size(); y++)
+            if(G.adjacent(vertices_to_introduce[x-1],bag_virtual[y]))
+                key++;
+        APQ.insertElement(x,key);
+    }
+    for(int temp = 0; temp<vertices_to_introduce.size();temp++)
+    {
+        int key = APQ.v[0].second;
+        int x = APQ.deleteRoot();
+        if(key == 0)
+            cout << "Warning; trying to introduce " << x << " with key 0." << endl; 
+        auto it = lower_bound(bag_virtual.begin(), bag_virtual.end(), vertices_to_introduce[x-1]);
+            
+
+        int i = it - bag_virtual.begin();// Relevant bitposition
+
+        bag_virtual.insert(it, vertices_to_introduce[x-1]);
+
+        take_virtual_step_introduce(current_virtual, 
+                valid_virtual,
+                domination_virtual,
+                c_virtual,
+                w_virtual,
+                p_virtual, 
+                i, 
+                bag_virtual,
+                number_of_neighbours_forgotten_virtual,
+                number_of_neighbours_present_virtual);
+        swap(current_virtual, parent_virtual);
+        cout << log2(valid_virtual[current_virtual-1].size()) << "," << bag_virtual.size() << endl;
+        for(int y = 0; y<vertices_to_introduce.size(); y++)
+            if(G.adjacent(vertices_to_introduce[x-1],vertices_to_introduce[y]) && APQ.p[y]!=-1)
+                APQ.updateKey(y+1,1);
     }
 
     validcandidates[parent-1] = move(valid_virtual[current_virtual-1]);
@@ -998,6 +1063,20 @@ void Smartstorage<T>::end_virtual_path_no_files(const int current, const RootedT
                 all_neighbours_accounted_for_mask |= (T(1) << j); 
         }
 
+        if(store_c)
+        {
+            validcandidates[parent-1] = decompress_from_file<T>("v_"+to_string(parent)+".zstd");
+            domination[parent-1] = decompress_from_file<T>("d_"+to_string(parent)+".zstd");
+            c[parent-1] = decompress_from_file<int>("c_"+to_string(parent)+".zstd");
+            w[parent-1] = decompress_from_file<int>("w_"+to_string(parent)+".zstd");
+            // Delete temp files now that data is loaded
+            std::remove(("v_"+to_string(parent)+".zstd").c_str());
+            std::remove(("d_"+to_string(parent)+".zstd").c_str());
+            std::remove(("c_"+to_string(parent)+".zstd").c_str());
+            std::remove(("w_"+to_string(parent)+".zstd").c_str());
+        }
+
+
         // Start doing: if intersecting, keep if all all_neighbours_accounted_for_mask are also dominated
         vector<T> valid_temporary;
         vector<T> domination_temporary;
@@ -1049,6 +1128,31 @@ void Smartstorage<T>::end_virtual_path_no_files(const int current, const RootedT
             p[parent-1][neighbourposition] = vector<int>();
         }
         */
+    }
+    if(
+        (parent == RT.root && RT.neighbourIterators[parent-1]+1 == RT.N[parent-1].end()) ||
+        (parent != RT.root && (
+            RT.neighbourIterators[parent-1]+1 == RT.N[parent-1].end() ||
+            (*(RT.neighbourIterators[parent-1]+1) == RT.parents[parent-1] && RT.neighbourIterators[parent-1]+2 == RT.N[parent-1].end())
+                            )
+        )
+    )
+    {
+
+    }
+    else
+    {
+        if(store_c)
+        {
+            compress_to_file<T>(validcandidates[parent-1], "v_"+to_string(parent)+".zstd");
+            validcandidates[parent-1] = vector<T>();
+            compress_to_file<T>(domination[parent-1], "d_"+to_string(parent)+".zstd");
+            domination[parent-1] = vector<T>();
+            compress_to_file<int>(c[parent-1], "c_"+to_string(parent)+".zstd");
+            c[parent-1] = vector<int>();
+            compress_to_file<int>(w[parent-1], "w_"+to_string(parent)+".zstd");
+            w[parent-1] = vector<int>();
+        }
     }
 }
 
