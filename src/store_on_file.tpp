@@ -5,7 +5,6 @@
 #include <stdexcept>
 #include <utility>
 #include <cstddef>
-#include <zstd_errors.h>
 
 using namespace std;
 

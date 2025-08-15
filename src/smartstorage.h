@@ -81,10 +81,8 @@ public:
         std::vector<int>& w_virtual,
         std::vector<int>& p_virtual);
 
-    void end_virtual_path(const int current, const RootedTree& RT,
-        std::vector<int>& c_virtual, std::vector<int>& p_virtual, std::vector<T>& valid_virtual);
 
-    void end_virtual_path_no_files(const int current, const RootedTree& RT,
+    void end_virtual_path(const int current, const RootedTree& RT,
         std::vector<T>& valid_virtual,
         std::vector<T>& domination_virtual,
         std::vector<int>& c_virtual, 

@@ -97,8 +97,8 @@ void Solution<T>::discover(const int current, const RootedTree& RT)
     {
         vector<int> p;
         p.resize(SIZES[parent-1]);
-        decompress_p_from_file(parent,neighbourposition,p);
-        remove_p_file(parent,neighbourposition);
+        //decompress_p_from_file(parent,neighbourposition,p);
+        //remove_p_file(parent,neighbourposition);
         choices[current-1] = p[choices[parent-1]]; //S.p[parent-1][neighbourposition][choices[parent-1]];
     }
     vector<int> v = bitmask_filter(validcandidates[choices[current-1]],S.bags[current-1]);

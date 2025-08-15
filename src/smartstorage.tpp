@@ -95,7 +95,7 @@ void Smartstorage<T>::finish(const int current, const RootedTree& RT)
     cout << "w:" << endl;
     print_vector(w[current-1]);
     */
-    cout << log2(validcandidates[current-1].size()) << "," << bags[current-1].size() << endl;
+    //cout << log2(validcandidates[current-1].size()) << "," << bags[current-1].size() << endl;
     //cout << endl;
     // */
     if(current != RT.root)
@@ -134,7 +134,7 @@ void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)
     int parent = RT.parents[current-1];
     //int neighbourposition = RT.neighbourIterators[parent-1] - RT.N[parent-1].begin();
 
-    cout << "WALKING FROM " << current << " TO " << parent << ":" << endl;
+    //cout << "WALKING FROM " << current << " TO " << parent << ":" << endl;
 
     const vector<int>& source_bag = bags[current-1];
     const vector<int>& target_bag = bags[parent-1];
@@ -145,7 +145,7 @@ void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)
 
     vector<vector<int>> c_virtual(2);
     vector<vector<int>> w_virtual(2);
-    vector<vector<int>> p_virtual(2);       //P
+    vector<vector<int>> p_virtual(2);       // P
     vector<vector<T>> valid_virtual(2);
     vector<vector<T>> domination_virtual(2);
 
@@ -160,82 +160,16 @@ void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)
     vector<int> number_of_neighbours_forgotten_virtual = number_of_neighbours_forgotten[current-1];
     vector<int> number_of_neighbours_present_virtual = number_of_neighbours_present[current-1];
 
-    vector<int> intersection_bag;
-    set_intersection(source_bag.begin(), source_bag.end(),target_bag.begin(), target_bag.end(),back_inserter(intersection_bag));
 
-    vector<int>::const_iterator it_source_bag = source_bag.begin();
-    vector<int>::const_iterator it_intersection_bag = intersection_bag.begin();
-
+    vector<int> vertices_to_introduce;
     int forgotten_so_far = 0;
-    while(it_source_bag != source_bag.end() && it_intersection_bag != intersection_bag.end())
+    int index_source = 0;
+    for(int index_target = 0; index_target<target_bag.size(); index_target++)
     {
-        if(*it_source_bag > *it_intersection_bag)
-            it_intersection_bag++;
-        else
+        while(index_source<source_bag.size() && source_bag[index_source]<target_bag[index_target])
         {
-
-            if(*it_source_bag==*it_intersection_bag)
-            {
-                //KEEP
-                it_source_bag++;
-                it_intersection_bag++;
-            }
-            else
-            {
-                // Forget *it_source_bag
-                {// BEGIN FORGET BLOCK
-                    auto it = lower_bound(bag_virtual.begin(), bag_virtual.end(), *it_source_bag);
-                    bag_virtual.erase(it);
-
-                    int i = it_source_bag-source_bag.begin()-forgotten_so_far;
-
-                    take_virtual_step_forget(current_virtual, 
-                        valid_virtual,
-                        domination_virtual,
-                        c_virtual, 
-                        w_virtual,
-                        p_virtual, 
-                        i, 
-                        *it_source_bag,
-                        bag_virtual, 
-                        number_of_neighbours_forgotten_virtual, 
-                        number_of_neighbours_present_virtual);
-                    swap(current_virtual, parent_virtual);
-                    /*
-                    cout << "After forgetting " << *it_source_bag << endl;
-                    cout << "Bag:" << endl;
-                    print_vector(bag_virtual);
-                    cout << "Forgotten:" << endl;
-                    print_vector(number_of_neighbours_forgotten_virtual);
-                    cout << "Present:" << endl;
-                    print_vector(number_of_neighbours_present_virtual);
-                    cout << "Valid:" << endl;
-                    print_vector(valid_virtual[current_virtual-1]);
-                    cout << "Domination:" << endl;
-                    print_vector(domination_virtual[current_virtual-1]);
-                    cout << "c:" << endl;
-                    print_vector(c_virtual[current_virtual-1]);
-                    cout << "w:" << endl;
-                    print_vector(w_virtual[current_virtual-1]);
-                    */
-                    //cout << log2(valid_virtual[current_virtual-1].size()) << "," << bag_virtual.size() << endl;
-                    //cout << endl;
-                    // */
-                }// END FORGET BLOCK
-                forgotten_so_far++;
-                it_source_bag++;
-            }
-        }
-    }
-    while(it_source_bag != source_bag.end())
-    {
-        // Forget *it_source_bag
-        {// BEGIN FORGET BLOCK
-            auto it = lower_bound(bag_virtual.begin(), bag_virtual.end(), *it_source_bag);
-            bag_virtual.erase(it);
-
-            int i = it_source_bag-source_bag.begin()-forgotten_so_far;
-
+            int i = index_source-forgotten_so_far;
+            bag_virtual.erase(bag_virtual.begin() + i);
             take_virtual_step_forget(current_virtual, 
                 valid_virtual,
                 domination_virtual,
@@ -243,161 +177,41 @@ void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)
                 w_virtual,
                 p_virtual, 
                 i, 
-                *it_source_bag,
-                bag_virtual,
-                number_of_neighbours_forgotten_virtual,
+                source_bag[index_source],
+                bag_virtual, 
+                number_of_neighbours_forgotten_virtual, 
                 number_of_neighbours_present_virtual);
             swap(current_virtual, parent_virtual);
-            /*
-            cout << "After forgetting " << *it_source_bag << endl;
-            cout << "Bag:" << endl;
-            print_vector(bag_virtual);
-            cout << "Forgotten:" << endl;
-            print_vector(number_of_neighbours_forgotten_virtual);
-            cout << "Present:" << endl;
-            print_vector(number_of_neighbours_present_virtual);
-            cout << "Valid:" << endl;
-            print_vector(valid_virtual[current_virtual-1]);
-            cout << "Domination:" << endl;
-            print_vector(domination_virtual[current_virtual-1]);
-            cout << "c:" << endl;
-            print_vector(c_virtual[current_virtual-1]);
-            cout << "w:" << endl;
-            print_vector(w_virtual[current_virtual-1]);
-            */
-            //cout << log2(valid_virtual[current_virtual-1].size()) << "," << bag_virtual.size() << endl;
-            //cout << endl;
-        }// END FORGET BLOCK
-        forgotten_so_far++;
-        it_source_bag++;
-    }
-
-
-    // Intersection of source_bag and target_bag is reached
-
-
-    vector<int> vertices_to_introduce;
-
-    it_intersection_bag = intersection_bag.begin();
-    vector<int>::const_iterator it_target_bag = target_bag.begin();
-
-    int introduced_so_far = 0;
-    while(it_target_bag != target_bag.end() && it_intersection_bag != intersection_bag.end())
-    {
-        if(*it_intersection_bag < *it_target_bag)
-            it_intersection_bag++;
-        else
-        {
-            if(*it_target_bag == *it_intersection_bag)
-            {
-                //SKIP
-                it_target_bag++;
-                it_intersection_bag++;
-            }
-            else
-            {
-                // Introduce *it_target_bag
-                {// BEGIN INTRODUCE BLOCK
-                    /*
-                    auto it = lower_bound(bag_virtual.begin(), bag_virtual.end(), *it_target_bag);
-                    
-
-                    int i = it - bag_virtual.begin();
-
-                    bag_virtual.insert(it, *it_target_bag);
-
-                    take_virtual_step_introduce(current_virtual, 
-                        valid_virtual,
-                        domination_virtual,
-                        c_virtual, 
-                        w_virtual,
-                        p_virtual, 
-                        i, 
-                        bag_virtual, 
-                        number_of_neighbours_forgotten_virtual,
-                        number_of_neighbours_present_virtual);
-                    swap(current_virtual,parent_virtual);
-                    */
-                    vertices_to_introduce.push_back(*it_target_bag);
-                    /*
-                    cout << "After introducing " << *it_target_bag << endl;
-                    cout << "Bag:" << endl;
-                    print_vector(bag_virtual);
-                    cout << "Forgotten:" << endl;
-                    print_vector(number_of_neighbours_forgotten_virtual);
-                    cout << "Present:" << endl;
-                    print_vector(number_of_neighbours_present_virtual);
-                    cout << "Valid:" << endl;
-                    print_vector(valid_virtual[current_virtual-1]);
-                    cout << "Domination:" << endl;
-                    print_vector(domination_virtual[current_virtual-1]);
-                    cout << "c:" << endl;
-                    print_vector(c_virtual[current_virtual-1]);
-                    cout << "w:" << endl;
-                    print_vector(w_virtual[current_virtual-1]);
-                    */
-                    //cout << log2(valid_virtual[current_virtual-1].size()) << "," << bag_virtual.size() << endl;
-                    //cout << endl;
-                }// END INTRODUCE BLOCK
-                introduced_so_far++;
-                it_target_bag++;
-
-            }
+            forgotten_so_far++;
+            index_source++;
         }
+        if(index_source<source_bag.size() && source_bag[index_source]==target_bag[index_target])
+            index_source++;
+        else
+            vertices_to_introduce.push_back(target_bag[index_target]);
+
     }
-    while(it_target_bag != target_bag.end())        //introduce what's left
+    while(index_source<source_bag.size())
     {
-        //Introduce *it_target_bag
-        {// Begin Introduce Block
-            /*
-            auto it = lower_bound(bag_virtual.begin(), bag_virtual.end(), *it_target_bag);
-            
-
-            int i = it - bag_virtual.begin();// Relevant bitposition
-
-            bag_virtual.insert(it, *it_target_bag);
-
-            take_virtual_step_introduce(current_virtual, 
-                valid_virtual,
-                domination_virtual,
-                c_virtual,
-                w_virtual,
-                p_virtual, 
-                i, 
-                bag_virtual,
-                number_of_neighbours_forgotten_virtual,
-                number_of_neighbours_present_virtual);
-            swap(current_virtual, parent_virtual);
-            */
-            vertices_to_introduce.push_back(*it_target_bag);
-            /*
-            cout << "After introducing " << *it_target_bag << endl;
-            cout << "Bag:" << endl;
-            print_vector(bag_virtual);
-            cout << "Forgotten:" << endl;
-            print_vector(number_of_neighbours_forgotten_virtual);
-            cout << "Present:" << endl;
-            print_vector(number_of_neighbours_present_virtual);
-            cout << "Valid:" << endl;
-            print_vector(valid_virtual[current_virtual-1]);
-            cout << "Domination:" << endl;
-            print_vector(domination_virtual[current_virtual-1]);
-            cout << "c:" << endl;
-            print_vector(c_virtual[current_virtual-1]);
-            cout << "w:" << endl;
-            print_vector(w_virtual[current_virtual-1]);
-            */
-            //cout << log2(valid_virtual[current_virtual-1].size()) << "," << bag_virtual.size() << endl;
-            //cout << endl;
-        }// END INTRODUCE BLOCK
-        introduced_so_far++;
-        it_target_bag++;
+        int i = index_source-forgotten_so_far;
+        bag_virtual.erase(bag_virtual.begin()+i);
+        take_virtual_step_forget(current_virtual, 
+            valid_virtual,
+            domination_virtual,
+            c_virtual, 
+            w_virtual,
+            p_virtual, 
+            i, 
+            source_bag[index_source],
+            bag_virtual, 
+            number_of_neighbours_forgotten_virtual, 
+            number_of_neighbours_present_virtual);
+        swap(current_virtual, parent_virtual);
+        forgotten_so_far++;
+        index_source++;
     }
-    //if(store_c)
-    //    end_virtual_path(current, RT, c_virtual[current_virtual-1], p_virtual[current_virtual-1], valid_virtual[current_virtual-1]);
-    //else
 
-    cout << log2(valid_virtual[current_virtual-1].size()) << "," << bag_virtual.size() << endl;
+    //cout << log2(valid_virtual[current_virtual-1].size()) << "," << bag_virtual.size() << endl;
 
     AddressablePriorityQueue<int,greater<int>,plus<int>> APQ(vertices_to_introduce.size());
     for(int x = 1; x<=vertices_to_introduce.size(); x++)
@@ -414,7 +228,7 @@ void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)
         int x = APQ.deleteRoot();
         //if(key == 0)
         //{
-        //    cout << "Warning; trying to introduce " << vertices_to_introduce[x-1] << " with key 0 which has degree " << G.N[vertices_to_introduce[x-1]-1].size() << endl; 
+            //cout << "Warning; trying to introduce " << vertices_to_introduce[x-1] << " with key 0 which has degree " << G.N[vertices_to_introduce[x-1]-1].size() << endl; 
         //    if(validcandidates[parent-1].size()>0)
         //    {
         //        int positioninparent = lower_bound(bags[parent-1].begin(),bags[parent-1].end(),vertices_to_introduce[x-1]) - bags[parent-1].begin();
@@ -442,15 +256,15 @@ void Smartstorage<T>::walk_virtual_path(const int current, const RootedTree& RT)
                 number_of_neighbours_forgotten_virtual,
                 number_of_neighbours_present_virtual);
         swap(current_virtual, parent_virtual);
-        cout << log2(valid_virtual[current_virtual-1].size()) << "," << bag_virtual.size() << endl;
+        //cout << log2(valid_virtual[current_virtual-1].size()) << "," << bag_virtual.size() << endl;
         for(int y = 0; y<vertices_to_introduce.size(); y++)
             if(G.adjacent(vertices_to_introduce[x-1],vertices_to_introduce[y]) && APQ.p[y]!=-1)
                 APQ.updateKey(y+1,1);
     }
 
-    cout << log2(valid_virtual[current_virtual-1].size()) << "," << bag_virtual.size() << endl;
+    //cout << log2(valid_virtual[current_virtual-1].size()) << "," << bag_virtual.size() << endl;
 
-    end_virtual_path_no_files(current, RT, 
+    end_virtual_path(current, RT, 
         valid_virtual[current_virtual-1],
         domination_virtual[current_virtual-1],
         c_virtual[current_virtual-1],
@@ -744,14 +558,13 @@ void Smartstorage<T>::take_virtual_step_forget(const int current_virtual,
     }
 }
 
-
 template<typename T>
 void Smartstorage<T>::initialize_leaf(const int current, const RootedTree& RT)
 {
     int parent = current;
     //int neighbourposition = RT.neighbourIterators[parent-1] - RT.N[parent-1].begin();
 
-    cout << "LEAF " << current << ":" << endl;
+    //cout << "LEAF " << current << ":" << endl;
 
     const vector<int>& source_bag = vector<int>();
     const vector<int>& target_bag = bags[parent-1];
@@ -766,110 +579,22 @@ void Smartstorage<T>::initialize_leaf(const int current, const RootedTree& RT)
     vector<vector<int>> w_virtual(2);
     vector<vector<int>> p_virtual(2);       //P
 
-    {///////////////////////////////////////////////////////////////// begin_virtual_path Leaf version
-    valid_virtual[current_virtual-1] = vector<T>(1,T(0));
-    domination_virtual[current_virtual-1] = vector<T>(1,T(0));
-
-    c_virtual[current_virtual-1] = vector<int>(1,0);
-    w_virtual[current_virtual-1] = vector<int>(1,0);
-    if(track_solution)
-    {
-        p_virtual[current_virtual-1] = vector<int>(1,0);  //P
-        iota(p_virtual[current_virtual-1].begin(), p_virtual[current_virtual-1].end(), 0);              //P, initalized p to correct position, itself
-    }
+    {////////////////////////////    begin_virtual_path Leaf version
+        valid_virtual[current_virtual-1] = vector<T>(1,T(0));
+        domination_virtual[current_virtual-1] = vector<T>(1,T(0));
+        c_virtual[current_virtual-1] = vector<int>(1,0);
+        w_virtual[current_virtual-1] = vector<int>(1,0);
+        //if(track_solution)
+        //{
+        //    p_virtual[current_virtual-1] = vector<int>(1,0);  //P
+        //    iota(p_virtual[current_virtual-1].begin(), p_virtual[current_virtual-1].end(), 0);              //P, initalized p to correct position, itself
+        //}
     }/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     vector<int> bag_virtual = source_bag;
     vector<int> number_of_neighbours_forgotten_virtual = vector<int>();
     vector<int> number_of_neighbours_present_virtual = vector<int>();
-    vector<int> intersection_bag;
-    set_intersection(source_bag.begin(), source_bag.end(),target_bag.begin(), target_bag.end(),back_inserter(intersection_bag));
 
-    //vector<int>::const_iterator it_source_bag = source_bag.begin();
-    vector<int>::const_iterator it_intersection_bag = intersection_bag.begin();
-
-    vector<int> vertices_to_introduce;
-
-    //Intersection of source_bag and target_bag is reached
-
-    it_intersection_bag = intersection_bag.begin();
-    vector<int>::const_iterator it_target_bag = target_bag.begin();
-
-    int introduced_so_far = 0;
-    while(it_target_bag != target_bag.end() && it_intersection_bag != intersection_bag.end())
-    {
-        if(*it_intersection_bag < *it_target_bag)
-            it_intersection_bag++;
-        else
-        {
-            if(*it_target_bag == *it_intersection_bag)
-            {
-                //SKIP
-                it_target_bag++;
-                it_intersection_bag++;
-            }
-            else
-            {
-                //Introduce *it_target_bag
-                {//BEGIN INTRODUCE BLOCK
-                    /*
-                    auto it = lower_bound(bag_virtual.begin(), bag_virtual.end(), *it_target_bag);
-                    bag_virtual.insert(it, *it_target_bag);
-
-                    int i = it_intersection_bag-intersection_bag.begin()+introduced_so_far;
-
-                    take_virtual_step_introduce(current_virtual,
-                        valid_virtual,
-                        domination_virtual,
-                        c_virtual, 
-                        w_virtual,
-                        p_virtual, 
-                        i, 
-                        bag_virtual,
-                        number_of_neighbours_forgotten_virtual,
-                        number_of_neighbours_present_virtual
-                    );
-                    swap(current_virtual,parent_virtual);
-                    */
-                   vertices_to_introduce.push_back(*it_target_bag);
-                }//END INTRODUCE BLOCK
-                introduced_so_far++;
-                it_target_bag++;
-
-            }
-        }
-        print_vector(bag_virtual);
-        cout << endl;
-    }
-    while(it_target_bag != target_bag.end())        //introduce what's left
-    {
-        //Introduce *it_target_bag
-        {//Begin Introduce Block
-            /*
-            auto it = lower_bound(bag_virtual.begin(), bag_virtual.end(), *it_target_bag);
-            bag_virtual.insert(it, *it_target_bag);
-
-            int i = it_intersection_bag-intersection_bag.begin()+introduced_so_far;     //Relevant bitposition
-
-            take_virtual_step_introduce(current_virtual, 
-                valid_virtual,
-                domination_virtual,
-                c_virtual, 
-                w_virtual,
-                p_virtual, 
-                i, 
-                bag_virtual,
-                number_of_neighbours_forgotten_virtual,
-                number_of_neighbours_present_virtual
-            );
-            swap(current_virtual, parent_virtual);
-            */
-            vertices_to_introduce.push_back(*it_target_bag);
-        }//END INTRODUCE BLOCK
-        introduced_so_far++;
-        it_target_bag++;
-    }
-
-    cout << log2(valid_virtual[current_virtual-1].size()) << "," << bag_virtual.size() << endl;
+    const vector<int>& vertices_to_introduce = target_bag; 
 
     AddressablePriorityQueue<int,greater<int>,plus<int>> APQ(vertices_to_introduce.size());
     for(int x = 1; x<=vertices_to_introduce.size(); x++)
@@ -884,15 +609,12 @@ void Smartstorage<T>::initialize_leaf(const int current, const RootedTree& RT)
     {
         int key = APQ.v[0].second;
         int x = APQ.deleteRoot();
-        if(key == 0)
-            cout << "Warning; trying to introduce " << x << " with key 0." << endl; 
+        //if(key == 0)
+        //    cout << "Warning; trying to introduce " << x << " with key 0." << endl;
+
         auto it = lower_bound(bag_virtual.begin(), bag_virtual.end(), vertices_to_introduce[x-1]);
-            
-
         int i = it - bag_virtual.begin();// Relevant bitposition
-
         bag_virtual.insert(it, vertices_to_introduce[x-1]);
-
         take_virtual_step_introduce(current_virtual, 
                 valid_virtual,
                 domination_virtual,
@@ -904,89 +626,23 @@ void Smartstorage<T>::initialize_leaf(const int current, const RootedTree& RT)
                 number_of_neighbours_forgotten_virtual,
                 number_of_neighbours_present_virtual);
         swap(current_virtual, parent_virtual);
-        cout << log2(valid_virtual[current_virtual-1].size()) << "," << bag_virtual.size() << endl;
+        //cout << log2(valid_virtual[current_virtual-1].size()) << "," << bag_virtual.size() << endl;
         for(int y = 0; y<vertices_to_introduce.size(); y++)
             if(G.adjacent(vertices_to_introduce[x-1],vertices_to_introduce[y]) && APQ.p[y]!=-1)
                 APQ.updateKey(y+1,1);
     }
 
-    validcandidates[parent-1] = move(valid_virtual[current_virtual-1]);
-    domination[parent-1] = move(domination_virtual[current_virtual-1]);
-    c[parent-1] = move(c_virtual[current_virtual-1]);
-    w[parent-1] = move(w_virtual[current_virtual-1]);
-
-    number_of_neighbours_forgotten[parent-1] = move(number_of_neighbours_forgotten_virtual);
-    number_of_neighbours_present[parent-1] = move(number_of_neighbours_present_virtual);
-    /*
-    if(track_solution)
-    {
-            p[parent-1][neighbourposition] = move(p_virtual[current_virtual-1]);
-    }
-    */
-}
-
-template<typename T>
-void Smartstorage<T>::end_virtual_path(const int current, const RootedTree& RT,
-        vector<int>& c_virtual, vector<int>& p_virtual, vector<T>& valid_virtual)
-{
-    int parent = RT.parents[current-1];
-    int neighbourposition = RT.neighbourIterators[parent-1] - RT.N[parent-1].begin();
-    //No information exists as of yet on parent
-    if(
-        //parent is the root and this is its first child
-        (parent==RT.root && RT.neighbourIterators[parent-1] == RT.N[parent-1].begin()) || 
-        //parent is not root and this is its first child(account for parent of parent neighbour)
-        (parent != RT.root && 
-            (RT.neighbourIterators[parent-1] == RT.N[parent-1].begin() || 
-                (RT.neighbourIterators[parent-1] - RT.N[parent-1].begin() == 1 && *RT.N[parent-1].begin() == RT.parents[parent-1])))
-    )
-    {
-        validcandidates[parent-1] = move(valid_virtual);
-        c[parent-1] = move(c_virtual);
-
-        if(track_solution)
-        {
-            p[parent-1][neighbourposition] = move(p_virtual);
-            compress_p_to_file(parent,neighbourposition,p[parent-1][neighbourposition]);
-            p[parent-1][neighbourposition] = vector<int>();
-        }
-    }
-    //Information on parent already exists
-    else
-    {
-        validcandidates[parent-1] = move(valid_virtual);
-        c[parent-1] = move(c_virtual);
-        decompress_c_from_file_and_add(parent,c[parent-1]);
-        remove_c_file(parent);
-        /*
-        for(size_t index = 0; index < c[parent-1].size(); index++)
-        {
-            c[parent-1][index] += c_virtual[current_virtual-1][index];
-        }*/
-        if(track_solution)
-        {
-            p[parent-1][neighbourposition] = move(p_virtual);
-            compress_p_to_file(parent,neighbourposition,p[parent-1][neighbourposition]);
-            p[parent-1][neighbourposition] = vector<int>();
-        }
-    }
-    //Dont do anything
-    if(
-        (parent == RT.root && RT.neighbourIterators[parent-1]+1 == RT.N[parent-1].end()) ||
-        (parent != RT.root && (
-            RT.neighbourIterators[parent-1]+1 == RT.N[parent-1].end() ||
-            (*(RT.neighbourIterators[parent-1]+1) == RT.parents[parent-1] && RT.neighbourIterators[parent-1]+2 == RT.N[parent-1].end())
-                            )
-        )
-    )
-    {
-
-    }
-    else
-    {
-        compress_c_to_file(parent, c[parent-1]);
-        c[parent-1] = vector<int>();
-        validcandidates[parent-1] = vector<T>();
+    {//END VIRTUAL PATH LEAF VERSION
+        validcandidates[parent-1] = move(valid_virtual[current_virtual-1]);
+        domination[parent-1] = move(domination_virtual[current_virtual-1]);
+        c[parent-1] = move(c_virtual[current_virtual-1]);
+        w[parent-1] = move(w_virtual[current_virtual-1]);
+        //if(track_solution)
+        //{
+        //        p[parent-1][neighbourposition] = move(p_virtual[current_virtual-1]);
+        //}
+        number_of_neighbours_forgotten[parent-1] = move(number_of_neighbours_forgotten_virtual);
+        number_of_neighbours_present[parent-1] = move(number_of_neighbours_present_virtual);
     }
 }
 
@@ -1014,7 +670,7 @@ void Smartstorage<T>::begin_virtual_path(const int current, const RootedTree& RT
 }
 
 template<typename T>
-void Smartstorage<T>::end_virtual_path_no_files(const int current, const RootedTree& RT,
+void Smartstorage<T>::end_virtual_path(const int current, const RootedTree& RT,
     vector<T>& valid_virtual,
     vector<T>& domination_virtual,
     vector<int>& c_virtual, 
@@ -1036,19 +692,18 @@ void Smartstorage<T>::end_virtual_path_no_files(const int current, const RootedT
                 (RT.neighbourIterators[parent-1] - RT.N[parent-1].begin() == 1 && *RT.N[parent-1].begin() == RT.parents[parent-1])))
     )
     {
-        number_of_neighbours_forgotten[parent-1] = move(number_of_neighbours_forgotten_virtual);
-        number_of_neighbours_present[parent-1] = move(number_of_neighbours_present_virtual);
-
         validcandidates[parent-1] = move(valid_virtual);
         domination[parent-1] = move(domination_virtual);
         c[parent-1] = move(c_virtual);
         w[parent-1] = move(w_virtual);
-        if(track_solution)
-        {
-            p[parent-1][neighbourposition] = move(p_virtual);
-            compress_p_to_file(parent,neighbourposition,p[parent-1][neighbourposition]);
-            p[parent-1][neighbourposition] = vector<int>();
-        }
+        //if(track_solution)
+        //{
+        //    p[parent-1][neighbourposition] = move(p_virtual);
+        //    compress_p_to_file(parent,neighbourposition,p[parent-1][neighbourposition]);
+        //    p[parent-1][neighbourposition] = vector<int>();
+        //}
+        number_of_neighbours_forgotten[parent-1] = move(number_of_neighbours_forgotten_virtual);
+        number_of_neighbours_present[parent-1] = move(number_of_neighbours_present_virtual);
     }
     //Information on parent already exists
     else
@@ -1098,11 +753,10 @@ void Smartstorage<T>::end_virtual_path_no_files(const int current, const RootedT
                     domination_temporary.push_back(domination[parent-1][index_parent] | domination_virtual[index_virtual]);
                     c_temporary.push_back(c[parent-1][index_parent] + c_virtual[index_virtual]);
                     w_temporary.push_back(w[parent-1][index_parent]);
-                    
-                    if(track_solution)
-                    {
-                        // p
-                    }
+                    //if(track_solution)
+                    //{
+                    //    
+                    //}
                 }
             }
         }
@@ -1110,39 +764,27 @@ void Smartstorage<T>::end_virtual_path_no_files(const int current, const RootedT
         domination[parent-1] = move(domination_temporary);
         c[parent-1] = move(c_temporary);
         w[parent-1] = move(w_temporary);
-        
-        if(track_solution)
-        {
-            // P; P is an issue
-        }
-
-        /*
-        for(size_t index = 0; index < c[parent-1].size(); index++)
-        {
-            c[parent-1][index] += c_virtual[index];
-        }
-        if(track_solution)
-        {
-            p[parent-1][neighbourposition] = move(p_virtual);
-            compress_p_to_file(parent,neighbourposition,p[parent-1][neighbourposition]);
-            p[parent-1][neighbourposition] = vector<int>();
-        }
-        */
+        //if(track_solution)
+        //{
+        //    p[parent-1][neighbourposition] = move(p_virtual);
+        //    compress_p_to_file(parent,neighbourposition,p[parent-1][neighbourposition]);
+        //    p[parent-1][neighbourposition] = vector<int>();
+        //}
     }
-    if(
+    if(store_c)
+    {
+        if(
         (parent == RT.root && RT.neighbourIterators[parent-1]+1 == RT.N[parent-1].end()) ||
         (parent != RT.root && (
             RT.neighbourIterators[parent-1]+1 == RT.N[parent-1].end() ||
             (*(RT.neighbourIterators[parent-1]+1) == RT.parents[parent-1] && RT.neighbourIterators[parent-1]+2 == RT.N[parent-1].end())
                             )
         )
-    )
-    {
+        )
+        {
 
-    }
-    else
-    {
-        if(store_c)
+        }
+        else
         {
             compress_to_file<T>(validcandidates[parent-1], "v_"+to_string(parent)+".zstd");
             validcandidates[parent-1] = vector<T>();
