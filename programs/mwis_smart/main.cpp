@@ -1,24 +1,18 @@
 #include <iostream>
 #include <vector>
-#include <fstream>
 #include <string>
 #include <sstream>
 #include <functional>
-#include <numeric>
-#include <algorithm>
-#include <bit>
 #include <chrono>
-#include <stdint.h>
-#include <stdio.h>
-#include <unordered_map>
 
-#include "../../src/treedecomp.h"
-#include "../../src/graph.h"
-#include "../../src/rootedtree.h"
-#include "../../src/solution.h"
 #include "../../src/general.h"
-#include "../../src/smartstorage.h"
 #include "../../src/cli.h"
+#include "../../src/graph.h"
+#include "../../src/treedecomp.h"
+#include "../../src/rootedtree.h"
+#include "../../src/smartstorage.h"
+#include "../../src/solution.h"
+
 
 
 using namespace std;

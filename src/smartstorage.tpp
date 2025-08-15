@@ -714,8 +714,14 @@ void Smartstorage<T>::end_virtual_path(const int current, const RootedTree& RT,
         for(size_t j = 0; j < bags[parent-1].size(); j++)
         {
             number_of_neighbours_forgotten[parent-1][j] += number_of_neighbours_forgotten_virtual[j];
+            //
+            //if(number_of_neighbours_forgotten[parent-1][j] + number_of_neighbours_present[parent-1][j] == G.N[bags[parent-1][j]-1].size()-1)
+            //{
+            //    cout << bags[parent-1][j] << " only needs one more neighbour" << endl;
+            //}
+            //
             if(number_of_neighbours_forgotten[parent-1][j] + number_of_neighbours_present[parent-1][j] == G.N[bags[parent-1][j]-1].size())
-                all_neighbours_accounted_for_mask |= (T(1) << j); 
+                all_neighbours_accounted_for_mask |= (T(1) << j);
         }
 
         if(store_c)

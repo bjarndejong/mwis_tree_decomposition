@@ -8,8 +8,6 @@
 class RootedTree;
 class Graph;
 
-#include "storage.h"
-
 template<typename T>
 class Smartstorage
 {
