@@ -4,6 +4,7 @@
 #ignore these directories whole
 /plots/
 /tex/
+!tex/acm/main.pdf
 /scripts/
 
 #Keep test_set
